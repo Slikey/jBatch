@@ -21,6 +21,14 @@ public class Packet1Handshake extends Packet {
         this.version = version;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     @Override
     public int getId() {
         return 1;

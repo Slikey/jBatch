@@ -21,24 +21,27 @@ public abstract class Packet {
 
     public static final Charset charset = Charset.forName("UTF-8");
     public static final int LIMIT_STRING_LIST_SIZE = Short.MAX_VALUE;
+    private static final Class[] packets = new Class[Byte.MAX_VALUE];
+
+    static {
+        packets[1] = Packet1Handshake.class;
+        packets[2] = Packet2HealthStatus.class;
+        packets[3] = Packet3AgentInformation.class;
+        packets[4] = Packet4Ping.class;
+        packets[5] = Packet5Pong.class;
+        packets[6] = Packet6KeepAlive.class;
+        packets[7] = Packet7RequestDisconnect.class;
+    }
 
     public static Packet byId(int id) throws BadPacketException {
-        switch (id) {
-            case 1:
-                return new Packet1Handshake();
-            case 2:
-                return new Packet2HealthStatus();
-            case 4:
-                return new Packet4Ping();
-            case 5:
-                return new Packet5Pong();
-            case 6:
-                return new Packet6KeepAlive();
-            case 7:
-                return new Packet7RequestDisconnect();
-            default:
-                throw new BadPacketException("Invalid Packet ID! Given: " + id);
+        try {
+            Class<?> packet = packets[id];
+            if (packet != null)
+                return (Packet) packet.newInstance();
+        } catch (IndexOutOfBoundsException | InstantiationException | IllegalAccessException e) {
+            throw new BadPacketException(e);
         }
+        throw new BadPacketException("Invalid Packet ID! Given: " + id);
     }
 
     public abstract int getId();

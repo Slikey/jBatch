@@ -5,10 +5,7 @@ import de.slikey.batch.network.client.NIOClient;
 import de.slikey.batch.network.protocol.ConnectionHandler;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.PacketHandler;
-import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
-import de.slikey.batch.network.protocol.packet.Packet4Ping;
-import de.slikey.batch.network.protocol.packet.Packet5Pong;
-import de.slikey.batch.network.protocol.packet.Packet6KeepAlive;
+import de.slikey.batch.network.protocol.packet.*;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -26,6 +23,7 @@ import java.util.concurrent.Executors;
  */
 public class BatchAgent extends NIOClient {
 
+    public static final int VERSION = 1;
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
             .setNameFormat("ChatClient")
@@ -49,6 +47,17 @@ public class BatchAgent extends NIOClient {
                     @Override
                     public PacketHandler newPacketHandler() {
                         return new PacketHandler() {
+
+                            @Override
+                            public void handle(Packet1Handshake packet) {
+                                if(packet.getVersion() == VERSION) {
+                                    System.out.println("Versions match! Sending information...");
+                                    socketChannel.writeAndFlush(new Packet3AgentInformation("Swegger 12342"));
+                                } else {
+                                    System.out.println("Versions mismatch! Shutting down!");
+                                    System.exit(0);
+                                }
+                            }
 
                             @Override
                             public void handle(Packet4Ping packet) {

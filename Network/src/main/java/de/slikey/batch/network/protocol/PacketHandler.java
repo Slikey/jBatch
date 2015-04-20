@@ -5,9 +5,6 @@ import de.slikey.batch.network.protocol.packet.*;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * @author Kevin
  * @since 23.03.2015
@@ -24,6 +21,10 @@ public class PacketHandler extends ChannelHandlerAdapter {
     }
 
     public void handle(Packet2HealthStatus packet) {
+
+    }
+
+    public void handle(Packet3AgentInformation packet) {
 
     }
 
