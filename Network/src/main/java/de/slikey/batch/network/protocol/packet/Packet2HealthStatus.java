@@ -8,7 +8,6 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.lang.management.*;
-import java.util.List;
 
 /**
  * @author Kevin Carstens
@@ -24,7 +23,6 @@ public class Packet2HealthStatus extends Packet {
 
     public static Packet2HealthStatus create() {
         Packet2HealthStatus packet = new Packet2HealthStatus();
-
         packet.committedVirtualMemorySize = systemBean.getCommittedVirtualMemorySize();
         packet.freePhysicalMemorySize = systemBean.getFreePhysicalMemorySize();
         packet.freeSwapSpaceSize = systemBean.getFreeSwapSpaceSize();
@@ -38,7 +36,6 @@ public class Packet2HealthStatus extends Packet {
         packet.vmVersion = runtimeBean.getVmVersion();
         packet.uptime = runtimeBean.getUptime();
         packet.startTime = runtimeBean.getStartTime();
-        packet.inputArguments = runtimeBean.getInputArguments();
 
         packet.heapMemoryUsage = memoryBean.getHeapMemoryUsage();
         packet.nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
@@ -73,7 +70,6 @@ public class Packet2HealthStatus extends Packet {
     private String vmVersion;
     private long uptime;
     private long startTime;
-    private List<String> inputArguments;
 
     // Information on Memory
     private MemoryUsage heapMemoryUsage;
@@ -119,7 +115,6 @@ public class Packet2HealthStatus extends Packet {
         writeString(buf, vmVersion);
         buf.writeLong(uptime);
         buf.writeLong(startTime);
-        writeStringList(buf, inputArguments);
 
         // Information on Memory
         writeMemoryUsage(buf, heapMemoryUsage);
@@ -155,7 +150,6 @@ public class Packet2HealthStatus extends Packet {
         vmVersion = readString(buf);
         uptime = buf.readLong();
         startTime = buf.readLong();
-        inputArguments = readStringList(buf);
 
         heapMemoryUsage = readMemoryUsage(buf);
         nonHeapMemoryUsage = readMemoryUsage(buf);
@@ -171,6 +165,7 @@ public class Packet2HealthStatus extends Packet {
         loadedClassCount = buf.readInt();
         totalLoadedClassCount = buf.readLong();
         unloadedClassCount = buf.readLong();
+
         return this;
     }
 
@@ -209,7 +204,6 @@ public class Packet2HealthStatus extends Packet {
                 ", vmVersion='" + vmVersion + '\'' +
                 ", uptime=" + uptime +
                 ", startTime=" + startTime +
-                ", inputArguments=" + inputArguments +
                 ", heapMemoryUsage={" + heapMemoryUsage + '}' +
                 ", nonHeapMemoryUsage={" + nonHeapMemoryUsage + '}' +
                 ", objectPendingFinalizationCount=" + objectPendingFinalizationCount +

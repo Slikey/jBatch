@@ -1,4 +1,4 @@
-package de.slikey.batch.controller.agent;
+package de.slikey.batch.controller.monitoring;
 
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
 
@@ -9,13 +9,13 @@ import java.util.List;
  * @author Kevin Carstens
  * @since 19.04.2015
  */
-public class AgentHealthMonitor {
+public class HealthMonitor {
 
-    private static final int LIMIT_SIZE_1S = 24 * 60 * 60;
+    private static final int LIMIT_SIZE_1S = 3 * 60 * 60;
 
     private final List<Packet2HealthStatus> healthStatuses_1s;
 
-    public AgentHealthMonitor() {
+    public HealthMonitor() {
         this.healthStatuses_1s = new LinkedList<>();
     }
 

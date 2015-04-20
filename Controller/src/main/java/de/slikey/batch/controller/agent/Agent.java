@@ -1,5 +1,6 @@
 package de.slikey.batch.controller.agent;
 
+import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.packet.Packet1Handshake;
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
 import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
@@ -17,7 +18,7 @@ public class Agent {
     private static final int VERSION = 1;
 
     private final Channel channel;
-    private final AgentHealthMonitor healthMonitor;
+    private final HealthMonitor healthMonitor;
 
     private AgentManager agentManager;
     private AgentState state;
@@ -25,7 +26,7 @@ public class Agent {
 
     public Agent(Channel channel) {
         this.channel = channel;
-        this.healthMonitor = new AgentHealthMonitor();
+        this.healthMonitor = new HealthMonitor();
 
         this.state = AgentState.CONNECTING;
     }

@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
@@ -13,14 +15,16 @@ import java.io.IOException;
  */
 public abstract class ConnectionHandler extends ChannelHandlerAdapter {
 
+    private static final Logger logger = LogManager.getLogger(ConnectionHandler.class);
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println(">> " + ctx.channel().remoteAddress().toString() + " connected.");
+        logger.info(">> Connected new Agent! (" + ctx.channel().remoteAddress() + ")");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("<< " + ctx.channel().remoteAddress().toString() + " disconnected.");
+        logger.info("<< Disconnected Agent! (" + ctx.channel().remoteAddress() + ")");
 
         super.channelInactive(ctx);
     }
@@ -30,15 +34,15 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
         if (ctx.channel().isActive()) {
             String address = ctx.channel().remoteAddress().toString();
             if (cause instanceof ReadTimeoutException) {
-                System.out.println(";; " + address + " timed out.");
+                logger.info("xx " + address + " timed out.");
             } else if (cause instanceof IOException) {
-                System.out.println(";; " + address + " IOException: " + cause.getMessage());
+                logger.info("xx " + address + " IOException: " + cause.getMessage());
             } else if (cause instanceof DecoderException) {
-                System.out.println(";; " + address + " sent a bad packet: " + cause.getMessage());
+                logger.info("xx " + address + " sent a bad packet: " + cause.getMessage());
                 if (cause.getCause() instanceof IndexOutOfBoundsException)
                     cause.printStackTrace();
             } else {
-                System.out.println(";; " + address + " encountered exception: ");
+                logger.info("xx " + address + " encountered exception: ");
                 cause.printStackTrace();
             }
 
