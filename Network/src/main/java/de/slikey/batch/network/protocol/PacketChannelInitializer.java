@@ -25,20 +25,18 @@ public abstract class PacketChannelInitializer extends ChannelInitializer<Socket
             pipeline.addLast(TIMEOUT_HANDLER, readTimeoutHandler);
 
         pipeline.addLast(PACKET_CODEC, newPacketCodec(socketChannel));
-        pipeline.addLast(CONNECTION_HANDLER, newConnectionHandler(socketChannel));
 
-        pipeline.addLast(PACKET_HANDLER, newPacketChannelHandler(socketChannel));
+        ConnectionHandler connectionHandler =  newConnectionHandler(socketChannel);
+        pipeline.addLast(CONNECTION_HANDLER,connectionHandler);
+
+        pipeline.addLast(PACKET_HANDLER, connectionHandler.newPacketHandler());
     }
-
-    protected abstract PacketHandler newPacketChannelHandler(SocketChannel socketChannel);
 
     protected PacketCodec newPacketCodec(SocketChannel socketChannel) {
         return new PacketCodec();
     }
 
-    protected ConnectionHandler newConnectionHandler(SocketChannel socketChannel) {
-        return new ConnectionHandler();
-    }
+    protected abstract ConnectionHandler newConnectionHandler(SocketChannel socketChannel);
 
     protected ReadTimeoutHandler newReadTimeoutHandler(SocketChannel socketChannel) {
         return new ReadTimeoutHandler(5);

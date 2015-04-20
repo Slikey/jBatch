@@ -9,19 +9,19 @@ import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
  */
 public class ControllerPacketHandler extends PacketHandler {
 
-    private final ControllerPacketChannelInitializer initializer;
+    private final ControllerConnectionHandler connectionHandler;
 
-    public ControllerPacketHandler(ControllerPacketChannelInitializer initializer) {
-        this.initializer = initializer;
+    public ControllerPacketHandler(ControllerConnectionHandler connectionHandler) {
+        this.connectionHandler = connectionHandler;
     }
 
-    public ControllerPacketChannelInitializer getInitializer() {
-        return initializer;
+    public ControllerConnectionHandler getConnectionHandler() {
+        return connectionHandler;
     }
 
     @Override
     public void handle(Packet2HealthStatus packet) {
-        System.out.println(packet);
+        connectionHandler.getAgent().handle(packet);
     }
 
 }

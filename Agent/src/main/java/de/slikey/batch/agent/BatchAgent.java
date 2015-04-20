@@ -2,6 +2,7 @@ package de.slikey.batch.agent;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.slikey.batch.network.client.NIOClient;
+import de.slikey.batch.network.protocol.ConnectionHandler;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
@@ -43,19 +44,24 @@ public class BatchAgent extends NIOClient {
         return new PacketChannelInitializer() {
 
             @Override
-            public PacketHandler newPacketChannelHandler(final SocketChannel socketChannel) {
-                return new PacketHandler() {
-
+            protected ConnectionHandler newConnectionHandler(final SocketChannel socketChannel) {
+                return new ConnectionHandler() {
                     @Override
-                    public void handle(Packet4Ping packet) {
-                        socketChannel.writeAndFlush(new Packet5Pong(packet, System.nanoTime()));
-                    }
+                    public PacketHandler newPacketHandler() {
+                        return new PacketHandler() {
 
-                    @Override
-                    public void handle(Packet5Pong packet) {
-                        System.out.println(packet);
-                    }
+                            @Override
+                            public void handle(Packet4Ping packet) {
+                                socketChannel.writeAndFlush(new Packet5Pong(packet, System.nanoTime()));
+                            }
 
+                            @Override
+                            public void handle(Packet5Pong packet) {
+                                System.out.println(packet);
+                            }
+
+                        };
+                    }
                 };
             }
 

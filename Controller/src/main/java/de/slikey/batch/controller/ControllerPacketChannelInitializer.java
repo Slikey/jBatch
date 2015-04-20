@@ -1,7 +1,6 @@
 package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.ConnectionHandler;
-import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
@@ -24,11 +23,6 @@ public class ControllerPacketChannelInitializer extends PacketChannelInitializer
     @Override
     protected ConnectionHandler newConnectionHandler(SocketChannel socketChannel) {
         return new ControllerConnectionHandler(this);
-    }
-
-    @Override
-    protected PacketHandler newPacketChannelHandler(SocketChannel socketChannel) {
-        return new ControllerPacketHandler(this);
     }
 
 }

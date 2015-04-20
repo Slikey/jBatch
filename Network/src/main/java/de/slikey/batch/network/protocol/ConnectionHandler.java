@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author Kevin
  * @since 17.04.2015
  */
-public class ConnectionHandler extends ChannelHandlerAdapter {
+public abstract class ConnectionHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -46,4 +46,5 @@ public class ConnectionHandler extends ChannelHandlerAdapter {
         }
     }
 
+    public abstract PacketHandler newPacketHandler();
 }

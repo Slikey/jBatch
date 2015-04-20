@@ -23,11 +23,19 @@ public class AgentManager {
     }
 
     public void addAgent(Agent agent) {
-        agents.put(agent.getChannel().remoteAddress(), agent);
+        agent.setAgentManager(this);
+        Agent oldAgent = agents.put(agent.getChannel().remoteAddress(), agent);
+        if (oldAgent != null) {
+            oldAgent.getChannel().close();
+        }
     }
 
     public void removeAgent(Channel channel) {
         agents.remove(channel.remoteAddress());
+    }
+
+    public BatchController getBatchController() {
+        return batchController;
     }
 
     public Collection<Agent> getAgents() {

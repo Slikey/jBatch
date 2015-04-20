@@ -11,31 +11,22 @@ import java.util.List;
  */
 public class AgentHealthMonitor {
 
-    private static final int LIMIT_SIZE_1S = 12 * 1000;
-    private static final int LIMIT_SIZE_10S = 12 * 1000;
+    private static final int LIMIT_SIZE_1S = 24 * 60 * 60;
 
     private final List<Packet2HealthStatus> healthStatuses_1s;
-    private final List<Packet2HealthStatus> healthStatuses_10s;
-    private long received;
 
     public AgentHealthMonitor() {
         this.healthStatuses_1s = new LinkedList<>();
-        this.healthStatuses_10s = new LinkedList<>();
-        this.received = 0;
     }
 
     public void addHealthStatus(Packet2HealthStatus packet) {
-        if (healthStatuses_1s.size() > LIMIT_SIZE_1S)
+        if (healthStatuses_1s.size() >= LIMIT_SIZE_1S)
             healthStatuses_1s.remove(0);
         healthStatuses_1s.add(packet);
+    }
 
-        if (received % 10 == 0) {
-            if (healthStatuses_10s.size() > LIMIT_SIZE_10S)
-                healthStatuses_10s.remove(0);
-            healthStatuses_10s.add(packet);
-        }
-
-        ++received;
+    public List<Packet2HealthStatus> getHealthStatuses_1s() {
+        return healthStatuses_1s;
     }
 
 }
