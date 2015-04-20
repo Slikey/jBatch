@@ -41,7 +41,7 @@ public class Packet2HealthStatus extends Packet {
         packet.inputArguments = runtimeBean.getInputArguments();
 
         packet.heapMemoryUsage = memoryBean.getHeapMemoryUsage();
-        packet.nonHealMemoryUsage = memoryBean.getNonHeapMemoryUsage();
+        packet.nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
         packet.objectPendingFinalizationCount = memoryBean.getObjectPendingFinalizationCount();
 
         packet.currentThreadCpuTime = threadBean.getCurrentThreadCpuTime();
@@ -77,7 +77,7 @@ public class Packet2HealthStatus extends Packet {
 
     // Information on Memory
     private MemoryUsage heapMemoryUsage;
-    private MemoryUsage nonHealMemoryUsage;
+    private MemoryUsage nonHeapMemoryUsage;
     private int objectPendingFinalizationCount;
 
     // Information on Threads
@@ -123,7 +123,7 @@ public class Packet2HealthStatus extends Packet {
 
         // Information on Memory
         writeMemoryUsage(buf, heapMemoryUsage);
-        writeMemoryUsage(buf, nonHealMemoryUsage);
+        writeMemoryUsage(buf, nonHeapMemoryUsage);
         buf.writeInt(objectPendingFinalizationCount);
 
         // Information on Threads
@@ -158,7 +158,7 @@ public class Packet2HealthStatus extends Packet {
         inputArguments = readStringList(buf);
 
         heapMemoryUsage = readMemoryUsage(buf);
-        nonHealMemoryUsage = readMemoryUsage(buf);
+        nonHeapMemoryUsage = readMemoryUsage(buf);
         objectPendingFinalizationCount = buf.readInt();
 
         currentThreadCpuTime = buf.readLong();
@@ -211,7 +211,7 @@ public class Packet2HealthStatus extends Packet {
                 ", startTime=" + startTime +
                 ", inputArguments=" + inputArguments +
                 ", heapMemoryUsage={" + heapMemoryUsage + '}' +
-                ", nonHealMemoryUsage={" + nonHealMemoryUsage + '}' +
+                ", nonHeapMemoryUsage={" + nonHeapMemoryUsage + '}' +
                 ", objectPendingFinalizationCount=" + objectPendingFinalizationCount +
                 ", currentThreadCpuTime=" + currentThreadCpuTime +
                 ", currentThreadUserTime=" + currentThreadUserTime +
