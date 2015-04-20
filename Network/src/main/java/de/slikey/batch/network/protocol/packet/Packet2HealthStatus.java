@@ -17,9 +17,9 @@ import java.util.List;
 public class Packet2HealthStatus extends Packet {
 
     private static final OperatingSystemMXBean systemBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+    private static final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
     private static final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
     private static final ThreadMXBean threadBean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
-    private static final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
     private static final ClassLoadingMXBean classBean = ManagementFactory.getClassLoadingMXBean();
 
     public static Packet2HealthStatus create() {
@@ -34,6 +34,12 @@ public class Packet2HealthStatus extends Packet {
         packet.totalPhysicalMemorySize = systemBean.getTotalPhysicalMemorySize();
         packet.totalSwapSpaceSize = systemBean.getTotalSwapSpaceSize();
 
+        packet.name = runtimeBean.getName();
+        packet.vmVersion = runtimeBean.getVmVersion();
+        packet.uptime = runtimeBean.getUptime();
+        packet.startTime = runtimeBean.getStartTime();
+        packet.inputArguments = runtimeBean.getInputArguments();
+
         packet.heapMemoryUsage = memoryBean.getHeapMemoryUsage();
         packet.nonHealMemoryUsage = memoryBean.getNonHeapMemoryUsage();
         packet.objectPendingFinalizationCount = memoryBean.getObjectPendingFinalizationCount();
@@ -44,12 +50,6 @@ public class Packet2HealthStatus extends Packet {
         packet.daemonThreadCount = threadBean.getDaemonThreadCount();
         packet.peakThreadCount = threadBean.getPeakThreadCount();
         packet.totalStartedThreadCount = threadBean.getTotalStartedThreadCount();
-
-        packet.name = runtimeBean.getName();
-        packet.vmVersion = runtimeBean.getVmVersion();
-        packet.uptime = runtimeBean.getUptime();
-        packet.startTime = runtimeBean.getStartTime();
-        packet.inputArguments = runtimeBean.getInputArguments();
 
         packet.loadedClassCount = classBean.getLoadedClassCount();
         packet.totalLoadedClassCount = classBean.getTotalLoadedClassCount();
@@ -68,6 +68,13 @@ public class Packet2HealthStatus extends Packet {
     private long totalPhysicalMemorySize;
     private long totalSwapSpaceSize;
 
+    // Information on Runtime
+    private String name;
+    private String vmVersion;
+    private long uptime;
+    private long startTime;
+    private List<String> inputArguments;
+
     // Information on Memory
     private MemoryUsage heapMemoryUsage;
     private MemoryUsage nonHealMemoryUsage;
@@ -80,13 +87,6 @@ public class Packet2HealthStatus extends Packet {
     private int daemonThreadCount;
     private int peakThreadCount;
     private long totalStartedThreadCount;
-
-    // Information on Runtime
-    private String name;
-    private String vmVersion;
-    private long uptime;
-    private long startTime;
-    private List<String> inputArguments;
 
     // Information on Classloading
     private int loadedClassCount;
@@ -114,6 +114,13 @@ public class Packet2HealthStatus extends Packet {
         buf.writeLong(totalPhysicalMemorySize);
         buf.writeLong(totalSwapSpaceSize);
 
+        // Information on Runtime
+        writeString(buf, name);
+        writeString(buf, vmVersion);
+        buf.writeLong(uptime);
+        buf.writeLong(startTime);
+        writeStringList(buf, inputArguments);
+
         // Information on Memory
         writeMemoryUsage(buf, heapMemoryUsage);
         writeMemoryUsage(buf, nonHealMemoryUsage);
@@ -126,13 +133,6 @@ public class Packet2HealthStatus extends Packet {
         buf.writeInt(daemonThreadCount);
         buf.writeInt(peakThreadCount);
         buf.writeLong(totalStartedThreadCount);
-
-        // Information on Runtime
-        writeString(buf, name);
-        writeString(buf, vmVersion);
-        buf.writeLong(uptime);
-        buf.writeLong(startTime);
-        writeStringList(buf, inputArguments);
 
         // Information on Classloading
         buf.writeInt(loadedClassCount);
@@ -151,6 +151,12 @@ public class Packet2HealthStatus extends Packet {
         totalPhysicalMemorySize = buf.readLong();
         totalSwapSpaceSize = buf.readLong();
 
+        name = readString(buf);
+        vmVersion = readString(buf);
+        uptime = buf.readLong();
+        startTime = buf.readLong();
+        inputArguments = readStringList(buf);
+
         heapMemoryUsage = readMemoryUsage(buf);
         nonHealMemoryUsage = readMemoryUsage(buf);
         objectPendingFinalizationCount = buf.readInt();
@@ -161,12 +167,6 @@ public class Packet2HealthStatus extends Packet {
         daemonThreadCount = buf.readInt();
         peakThreadCount = buf.readInt();
         totalStartedThreadCount = buf.readLong();
-
-        name = readString(buf);
-        vmVersion = readString(buf);
-        uptime = buf.readLong();
-        startTime = buf.readLong();
-        inputArguments = readStringList(buf);
 
         loadedClassCount = buf.readInt();
         totalLoadedClassCount = buf.readLong();
@@ -205,6 +205,11 @@ public class Packet2HealthStatus extends Packet {
                 ", systemCpuLoad=" + systemCpuLoad +
                 ", totalPhysicalMemorySize=" + totalPhysicalMemorySize +
                 ", totalSwapSpaceSize=" + totalSwapSpaceSize +
+                ", name='" + name + '\'' +
+                ", vmVersion='" + vmVersion + '\'' +
+                ", uptime=" + uptime +
+                ", startTime=" + startTime +
+                ", inputArguments=" + inputArguments +
                 ", heapMemoryUsage={" + heapMemoryUsage + '}' +
                 ", nonHealMemoryUsage={" + nonHealMemoryUsage + '}' +
                 ", objectPendingFinalizationCount=" + objectPendingFinalizationCount +
@@ -214,14 +219,10 @@ public class Packet2HealthStatus extends Packet {
                 ", daemonThreadCount=" + daemonThreadCount +
                 ", peakThreadCount=" + peakThreadCount +
                 ", totalStartedThreadCount=" + totalStartedThreadCount +
-                ", name='" + name + '\'' +
-                ", vmVersion='" + vmVersion + '\'' +
-                ", uptime=" + uptime +
-                ", startTime=" + startTime +
-                ", inputArguments=" + inputArguments +
                 ", loadedClassCount=" + loadedClassCount +
                 ", totalLoadedClassCount=" + totalLoadedClassCount +
                 ", unloadedClassCount=" + unloadedClassCount +
                 '}';
     }
+
 }

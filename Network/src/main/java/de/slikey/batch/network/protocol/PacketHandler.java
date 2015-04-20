@@ -24,7 +24,7 @@ public class PacketHandler extends ChannelHandlerAdapter {
 
     }
 
-    public void handle(Packet3AgentInformation packet) {
+    public void handle(Packet40AgentInformation packet) {
 
     }
 

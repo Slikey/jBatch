@@ -50,9 +50,9 @@ public class BatchAgent extends NIOClient {
 
                             @Override
                             public void handle(Packet1Handshake packet) {
-                                if(packet.getVersion() == VERSION) {
+                                if (packet.getVersion() == VERSION) {
                                     System.out.println("Versions match! Sending information...");
-                                    socketChannel.writeAndFlush(new Packet3AgentInformation("Swegger 12342"));
+                                    socketChannel.writeAndFlush(new Packet40AgentInformation(Packet40AgentInformation.USERNAME, Packet40AgentInformation.PASSWORD));
                                 } else {
                                     System.out.println("Versions mismatch! Shutting down!");
                                     System.exit(0);

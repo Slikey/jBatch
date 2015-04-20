@@ -6,8 +6,8 @@ package de.slikey.batch.controller.agent;
  */
 public enum AgentState {
 
+    CONNECTING,
     AUTHENTICATE,
-    EXCHANGE,
     WORKING,
     CLOSING,
     CLOSED

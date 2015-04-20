@@ -26,11 +26,12 @@ public abstract class Packet {
     static {
         packets[1] = Packet1Handshake.class;
         packets[2] = Packet2HealthStatus.class;
-        packets[3] = Packet3AgentInformation.class;
         packets[4] = Packet4Ping.class;
         packets[5] = Packet5Pong.class;
         packets[6] = Packet6KeepAlive.class;
         packets[7] = Packet7RequestDisconnect.class;
+
+        packets[40] = Packet40AgentInformation.class;
     }
 
     public static Packet byId(int id) throws BadPacketException {

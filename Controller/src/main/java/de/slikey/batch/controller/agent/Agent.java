@@ -2,7 +2,7 @@ package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.network.protocol.packet.Packet1Handshake;
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
-import de.slikey.batch.network.protocol.packet.Packet3AgentInformation;
+import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,14 +21,13 @@ public class Agent {
 
     private AgentManager agentManager;
     private AgentState state;
-    private String name;
+    private Packet40AgentInformation information;
 
-    public Agent(Channel channel, String name) {
+    public Agent(Channel channel) {
         this.channel = channel;
         this.healthMonitor = new AgentHealthMonitor();
 
-        this.state = AgentState.AUTHENTICATE;
-        this.name = name;
+        this.state = AgentState.CONNECTING;
     }
 
     public AgentManager getAgentManager() {
@@ -47,12 +46,8 @@ public class Agent {
         this.state = state;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public Packet40AgentInformation getInformation() {
+        return information;
     }
 
     public Channel getChannel() {
@@ -60,8 +55,9 @@ public class Agent {
     }
 
     public void connected() {
-        logger.info("cc Sending handshake to Agent (" + name + ")...");
+        logger.info("cc Sending handshake to Agent (" + channel.remoteAddress().toString() + ")...");
         channel.writeAndFlush(new Packet1Handshake(VERSION));
+        state = AgentState.AUTHENTICATE;
     }
 
     public void disconnected() {
@@ -72,7 +68,17 @@ public class Agent {
         healthMonitor.addHealthStatus(packet);
     }
 
-    public void handleAgentInformation(Packet3AgentInformation packet) {
-        name = packet.getName();
+    public void handleAgentInformation(Packet40AgentInformation packet) {
+        information = packet;
+        logger.info("cc Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+        if (packet.getName().equals(Packet40AgentInformation.USERNAME) && packet.getPassword().equals(Packet40AgentInformation.PASSWORD)) {
+            // Authentication successful
+            logger.info("cc Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+            state = AgentState.WORKING;
+        } else {
+            logger.info("cc Agent failed to authenticate! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+            state = AgentState.CLOSED;
+            channel.close();
+        }
     }
 }

@@ -2,7 +2,7 @@ package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
-import de.slikey.batch.network.protocol.packet.Packet3AgentInformation;
+import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
 
 /**
  * @author Kevin Carstens
@@ -26,7 +26,7 @@ public class ControllerPacketHandler extends PacketHandler {
     }
 
     @Override
-    public void handle(Packet3AgentInformation packet) {
+    public void handle(Packet40AgentInformation packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
     }
 }
