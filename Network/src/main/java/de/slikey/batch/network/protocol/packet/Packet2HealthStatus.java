@@ -23,6 +23,7 @@ public class Packet2HealthStatus extends Packet {
 
     public static Packet2HealthStatus create() {
         Packet2HealthStatus packet = new Packet2HealthStatus();
+
         packet.committedVirtualMemorySize = systemBean.getCommittedVirtualMemorySize();
         packet.freePhysicalMemorySize = systemBean.getFreePhysicalMemorySize();
         packet.freeSwapSpaceSize = systemBean.getFreeSwapSpaceSize();

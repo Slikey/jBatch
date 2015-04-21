@@ -4,6 +4,7 @@ import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.packet.Packet1Handshake;
 import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
 import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
+import de.slikey.batch.network.protocol.packet.Packet8AuthResponse;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,7 +57,7 @@ public class Agent {
     }
 
     public void connected() {
-        logger.info("cc Sending handshake to Agent (" + channel.remoteAddress().toString() + ")...");
+        logger.info("cc Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
         channel.writeAndFlush(new Packet1Handshake(VERSION));
         state = AgentState.AUTHENTICATE;
     }
@@ -72,13 +73,23 @@ public class Agent {
     public void handleAgentInformation(Packet40AgentInformation packet) {
         information = packet;
         logger.info("cc Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+
+        Packet8AuthResponse response = new Packet8AuthResponse();
         if (packet.getName().equals(Packet40AgentInformation.USERNAME) && packet.getPassword().equals(Packet40AgentInformation.PASSWORD)) {
             // Authentication successful
             logger.info("cc Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.WORKING;
+            response.setCode(Packet8AuthResponse.AuthResponseCode.SUCCESS);
+            response.setMessage("OK");
         } else {
             logger.info("cc Agent failed to authenticate! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
-            state = AgentState.CLOSED;
+            state = AgentState.CLOSING;
+            response.setCode(Packet8AuthResponse.AuthResponseCode.ERROR);
+            response.setMessage("ERROR");
+        }
+        channel.writeAndFlush(response);
+
+        if (state == AgentState.CLOSING) {
             channel.close();
         }
     }

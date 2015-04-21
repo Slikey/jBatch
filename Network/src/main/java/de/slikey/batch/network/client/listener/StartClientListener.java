@@ -1,13 +1,18 @@
 package de.slikey.batch.network.client.listener;
 
+import de.slikey.batch.network.server.NIOServer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Kevin Carstens
  * @since 13.04.2015
  */
 public class StartClientListener implements GenericFutureListener<Future<Void>> {
+
+    private static final Logger logger = LogManager.getLogger(NIOServer.class);
 
     private final String host;
     private final int port;
@@ -19,7 +24,7 @@ public class StartClientListener implements GenericFutureListener<Future<Void>> 
 
     @Override
     public void operationComplete(Future<Void> future) throws Exception {
-        System.out.println("Successfully connected to " + host + ":" + port + "!");
+        logger.info("Successfully connected to " + host + ":" + port + "!");
     }
 
 }

@@ -40,7 +40,7 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
             } else {
                 // All data is received
                 int packetId = Packet.readVarInt(byteBuf);
-                Packet packet = Packet.byId(packetId);
+                Packet packet = Protocol.byId(packetId);
                 packet.read(byteBuf);
                 list.add(packet);
             }

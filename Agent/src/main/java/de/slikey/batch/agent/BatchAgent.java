@@ -9,6 +9,8 @@ import de.slikey.batch.network.protocol.packet.*;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,10 +25,11 @@ import java.util.concurrent.Executors;
  */
 public class BatchAgent extends NIOClient {
 
+    private static final Logger logger = LogManager.getLogger(BatchAgent.class);
     public static final int VERSION = 1;
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
-            .setNameFormat("ChatClient")
+            .setNameFormat("BatchAgent")
             .build());
 
     public static void main(String[] args) throws InterruptedException {
@@ -50,11 +53,12 @@ public class BatchAgent extends NIOClient {
 
                             @Override
                             public void handle(Packet1Handshake packet) {
+                                logger.info("cc Received handshake..");
                                 if (packet.getVersion() == VERSION) {
-                                    System.out.println("Versions match! Sending information...");
+                                    logger.info("cc Versions match! Sending auth-information...");
                                     socketChannel.writeAndFlush(new Packet40AgentInformation(Packet40AgentInformation.USERNAME, Packet40AgentInformation.PASSWORD));
                                 } else {
-                                    System.out.println("Versions mismatch! Shutting down!");
+                                    logger.info("cc Versions mismatch! Shutting down!");
                                     System.exit(0);
                                 }
                             }
@@ -69,6 +73,15 @@ public class BatchAgent extends NIOClient {
                                 System.out.println(packet);
                             }
 
+                            @Override
+                            public void handle(Packet8AuthResponse packet) {
+                                if (packet.getCode() == Packet8AuthResponse.AuthResponseCode.SUCCESS) {
+                                    logger.info("cc Authentication successful!");
+                                } else {
+                                    logger.info("cc Authentication unsuccessful! Shutting down...");
+                                    System.exit(0);
+                                }
+                            }
                         };
                     }
                 };

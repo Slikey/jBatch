@@ -1,7 +1,10 @@
 package de.slikey.batch.network.server.listener;
 
+import de.slikey.batch.network.server.NIOServer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Kevin Carstens
@@ -9,15 +12,18 @@ import io.netty.util.concurrent.GenericFutureListener;
  */
 public class StartServerListener implements GenericFutureListener<Future<Void>> {
 
-    private final int port;
+    private static final Logger logger = LogManager.getLogger(NIOServer.class);
 
-    public StartServerListener(int port) {
-        this.port = port;
+    private final NIOServer server;
+
+    public StartServerListener(NIOServer server) {
+        this.server = server;
     }
 
     @Override
     public void operationComplete(Future<Void> future) throws Exception {
-        System.out.println("Successfully bound to port " + port + "!");
+        logger.info("Successfully bound to port " + server.getPort() + "!");
+        server.startApplication();
     }
 
 }

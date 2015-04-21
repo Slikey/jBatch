@@ -1,6 +1,5 @@
 package de.slikey.batch.network.protocol;
 
-import de.slikey.batch.network.protocol.packet.*;
 import io.netty.buffer.ByteBuf;
 
 import java.io.ByteArrayOutputStream;
@@ -21,29 +20,6 @@ public abstract class Packet {
 
     public static final Charset charset = Charset.forName("UTF-8");
     public static final int LIMIT_STRING_LIST_SIZE = Short.MAX_VALUE;
-    private static final Class[] packets = new Class[Byte.MAX_VALUE];
-
-    static {
-        packets[1] = Packet1Handshake.class;
-        packets[2] = Packet2HealthStatus.class;
-        packets[4] = Packet4Ping.class;
-        packets[5] = Packet5Pong.class;
-        packets[6] = Packet6KeepAlive.class;
-        packets[7] = Packet7RequestDisconnect.class;
-
-        packets[40] = Packet40AgentInformation.class;
-    }
-
-    public static Packet byId(int id) throws BadPacketException {
-        try {
-            Class<?> packet = packets[id];
-            if (packet != null)
-                return (Packet) packet.newInstance();
-        } catch (IndexOutOfBoundsException | InstantiationException | IllegalAccessException e) {
-            throw new BadPacketException(e);
-        }
-        throw new BadPacketException("Invalid Packet ID! Given: " + id);
-    }
 
     public abstract int getId();
 

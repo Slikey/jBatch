@@ -16,32 +16,36 @@ public class PacketHandler extends ChannelHandlerAdapter {
         ((Packet) object).handle(this);
     }
 
-    public void handle(Packet1Handshake packet) {
+    private void error(Packet packet) {
+        throw new IllegalStateException("PacketHandler does not implement handler for " + packet.getClass().getSimpleName() + "!");
+    }
 
+    public void handle(Packet1Handshake packet) {
+        error(packet);
     }
 
     public void handle(Packet2HealthStatus packet) {
-
-    }
-
-    public void handle(Packet40AgentInformation packet) {
-
+        error(packet);
     }
 
     public void handle(Packet4Ping packet) {
-
+        error(packet);
     }
 
     public void handle(Packet5Pong packet) {
-
+        error(packet);
     }
 
     public void handle(Packet6KeepAlive packet) {
-
+        error(packet);
     }
 
-    public void handle(Packet7RequestDisconnect packet) {
+    public void handle(Packet8AuthResponse packet) {
+        error(packet);
+    }
 
+    public void handle(Packet40AgentInformation packet) {
+        error(packet);
     }
 
 }

@@ -1,6 +1,7 @@
 package de.slikey.batch.network.server;
 
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
+import de.slikey.batch.network.protocol.Protocol;
 import de.slikey.batch.network.server.listener.StartServerListener;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -9,12 +10,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Kevin
  * @since 23.03.2015
  */
 public abstract class NIOServer {
+
+    private static final Logger logger = LogManager.getLogger(NIOServer.class);
 
     private final int port;
     private EventLoopGroup bossLoop, workerLoop;
@@ -28,6 +33,7 @@ public abstract class NIOServer {
         workerLoop = new NioEventLoopGroup();
 
         try {
+            Protocol.initialize();
             ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
             ServerBootstrap bootstrap = new ServerBootstrap()
                     .group(bossLoop, workerLoop)
@@ -39,10 +45,10 @@ public abstract class NIOServer {
                     .childOption(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            System.out.println("Attempting to bind on port " + port + "...");
+            logger.info("Attempting to bind on port " + port + "...");
             bootstrap.bind(port)
                     .sync()
-                    .addListener(new StartServerListener(port))
+                    .addListener(new StartServerListener(this))
                     .channel()
                     .closeFuture()
                     .sync();
@@ -52,6 +58,10 @@ public abstract class NIOServer {
             bossLoop.shutdownGracefully();
             workerLoop.shutdownGracefully();
         }
+    }
+
+    public int getPort() {
+        return port;
     }
 
     protected void close() {
@@ -69,6 +79,10 @@ public abstract class NIOServer {
         } else {
             System.out.println("There is no workerLoop!");
         }
+    }
+
+    public void startApplication() {
+
     }
 
     protected abstract PacketChannelInitializer buildPacketChannelInitializer();
