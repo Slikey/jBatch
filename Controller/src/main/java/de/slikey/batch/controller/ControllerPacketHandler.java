@@ -1,9 +1,7 @@
 package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.PacketHandler;
-import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
-import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
-import de.slikey.batch.network.protocol.packet.Packet6KeepAlive;
+import de.slikey.batch.network.protocol.packet.*;
 
 /**
  * @author Kevin Carstens
@@ -22,17 +20,27 @@ public class ControllerPacketHandler extends PacketHandler {
     }
 
     @Override
-    public void handle(Packet2HealthStatus packet) {
+    public void handle(HealthStatusPacket packet) {
         connectionHandler.getAgent().handleHealthStatus(packet);
     }
 
     @Override
-    public void handle(Packet6KeepAlive packet) {
+    public void handle(PingPacket packet) {
+        connectionHandler.getAgent().sendPacket(PongPacket.create(packet));
+    }
+
+    @Override
+    public void handle(PongPacket packet) {
+        System.out.println(packet);
+    }
+
+    @Override
+    public void handle(KeepAlivePacket packet) {
 
     }
 
     @Override
-    public void handle(Packet40AgentInformation packet) {
+    public void handle(AgentInformationPacket packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
     }
 }

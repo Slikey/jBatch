@@ -11,4 +11,12 @@
 
     <artifactId>batch-network</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>trove</groupId>
+            <artifactId>trove</artifactId>
+            <version>1.1-beta-5</version>
+        </dependency>
+    </dependencies>
+
 </project>

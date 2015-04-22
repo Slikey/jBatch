@@ -1,10 +1,11 @@
 package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.controller.monitoring.HealthMonitor;
-import de.slikey.batch.network.protocol.packet.Packet1Handshake;
-import de.slikey.batch.network.protocol.packet.Packet2HealthStatus;
-import de.slikey.batch.network.protocol.packet.Packet40AgentInformation;
-import de.slikey.batch.network.protocol.packet.Packet8AuthResponse;
+import de.slikey.batch.network.protocol.Packet;
+import de.slikey.batch.network.protocol.packet.AgentInformationPacket;
+import de.slikey.batch.network.protocol.packet.AuthResponsePacket;
+import de.slikey.batch.network.protocol.packet.HandshakePacket;
+import de.slikey.batch.network.protocol.packet.HealthStatusPacket;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class Agent {
 
     private AgentManager agentManager;
     private AgentState state;
-    private Packet40AgentInformation information;
+    private AgentInformationPacket information;
 
     public Agent(Channel channel) {
         this.channel = channel;
@@ -48,7 +49,7 @@ public class Agent {
         this.state = state;
     }
 
-    public Packet40AgentInformation getInformation() {
+    public AgentInformationPacket getInformation() {
         return information;
     }
 
@@ -56,9 +57,13 @@ public class Agent {
         return channel;
     }
 
+    public void sendPacket(Packet packet) {
+        channel.writeAndFlush(packet);
+    }
+
     public void connected() {
         logger.info("cc Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
-        channel.writeAndFlush(new Packet1Handshake(VERSION));
+        channel.writeAndFlush(new HandshakePacket(VERSION));
         state = AgentState.AUTHENTICATE;
     }
 
@@ -66,28 +71,28 @@ public class Agent {
 
     }
 
-    public void handleHealthStatus(Packet2HealthStatus packet) {
+    public void handleHealthStatus(HealthStatusPacket packet) {
         healthMonitor.addHealthStatus(packet);
     }
 
-    public void handleAgentInformation(Packet40AgentInformation packet) {
+    public void handleAgentInformation(AgentInformationPacket packet) {
         information = packet;
         logger.info("cc Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
 
-        Packet8AuthResponse response = new Packet8AuthResponse();
-        if (packet.getName().equals(Packet40AgentInformation.USERNAME) && packet.getPassword().equals(Packet40AgentInformation.PASSWORD)) {
+        AuthResponsePacket response = new AuthResponsePacket();
+        if (packet.getName().equals(AgentInformationPacket.USERNAME) && packet.getPassword().equals(AgentInformationPacket.PASSWORD)) {
             // Authentication successful
             logger.info("cc Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.WORKING;
-            response.setCode(Packet8AuthResponse.AuthResponseCode.SUCCESS);
+            response.setCode(AuthResponsePacket.AuthResponseCode.SUCCESS);
             response.setMessage("OK");
         } else {
             logger.info("cc Agent failed to authenticate! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.CLOSING;
-            response.setCode(Packet8AuthResponse.AuthResponseCode.ERROR);
+            response.setCode(AuthResponsePacket.AuthResponseCode.ERROR);
             response.setMessage("ERROR");
         }
-        channel.writeAndFlush(response);
+        sendPacket(response);
 
         if (state == AgentState.CLOSING) {
             channel.close();

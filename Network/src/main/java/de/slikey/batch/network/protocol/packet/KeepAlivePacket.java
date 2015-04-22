@@ -10,15 +10,10 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 16.04.2015
  */
-public class Packet6KeepAlive extends Packet {
+public class KeepAlivePacket extends Packet {
 
-    public Packet6KeepAlive() {
+    public KeepAlivePacket() {
 
-    }
-
-    @Override
-    public int getId() {
-        return 6;
     }
 
     @Override
@@ -38,7 +33,7 @@ public class Packet6KeepAlive extends Packet {
 
     @Override
     public String toString() {
-        return "Packet6KeepAlive{}";
+        return "KeepAlivePacket{}";
     }
 
 }

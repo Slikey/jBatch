@@ -29,7 +29,7 @@ public class BatchAgent extends NIOClient {
     public static final int VERSION = 1;
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
-            .setNameFormat("BatchAgent")
+            .setNameFormat("BatchAgent-%s")
             .build());
 
     public static void main(String[] args) throws InterruptedException {
@@ -52,11 +52,22 @@ public class BatchAgent extends NIOClient {
                         return new PacketHandler() {
 
                             @Override
-                            public void handle(Packet1Handshake packet) {
+                            public void handle(PingPacket packet) {
+                                logger.debug("Answering Ping: " + packet.toString());
+                                socketChannel.writeAndFlush(PongPacket.create(packet));
+                            }
+
+                            @Override
+                            public void handle(PongPacket packet) {
+                                logger.debug("Received Pong: " + packet.toString());
+                            }
+
+                            @Override
+                            public void handle(HandshakePacket packet) {
                                 logger.info("cc Received handshake..");
                                 if (packet.getVersion() == VERSION) {
                                     logger.info("cc Versions match! Sending auth-information...");
-                                    socketChannel.writeAndFlush(new Packet40AgentInformation(Packet40AgentInformation.USERNAME, Packet40AgentInformation.PASSWORD));
+                                    socketChannel.writeAndFlush(new AgentInformationPacket(AgentInformationPacket.USERNAME, AgentInformationPacket.PASSWORD));
                                 } else {
                                     logger.info("cc Versions mismatch! Shutting down!");
                                     System.exit(0);
@@ -64,18 +75,8 @@ public class BatchAgent extends NIOClient {
                             }
 
                             @Override
-                            public void handle(Packet4Ping packet) {
-                                socketChannel.writeAndFlush(new Packet5Pong(packet, System.nanoTime()));
-                            }
-
-                            @Override
-                            public void handle(Packet5Pong packet) {
-                                System.out.println(packet);
-                            }
-
-                            @Override
-                            public void handle(Packet8AuthResponse packet) {
-                                if (packet.getCode() == Packet8AuthResponse.AuthResponseCode.SUCCESS) {
+                            public void handle(AuthResponsePacket packet) {
+                                if (packet.getCode() == AuthResponsePacket.AuthResponseCode.SUCCESS) {
                                     logger.info("cc Authentication successful!");
                                 } else {
                                     logger.info("cc Authentication unsuccessful! Shutting down...");
@@ -103,7 +104,7 @@ public class BatchAgent extends NIOClient {
             public void run() {
                 try {
                     while (channel.isActive()) {
-                        channel.writeAndFlush(new Packet6KeepAlive());
+                        channel.writeAndFlush(new KeepAlivePacket());
                         Thread.sleep(random.nextInt(4000));
                     }
                 } catch (InterruptedException e) {
@@ -116,7 +117,7 @@ public class BatchAgent extends NIOClient {
             public void run() {
                 try {
                     while (channel.isActive()) {
-                        channel.writeAndFlush(Packet2HealthStatus.create());
+                        channel.writeAndFlush(HealthStatusPacket.create());
                         Thread.sleep(random.nextInt(1000));
                     }
                 } catch (InterruptedException e) {
@@ -141,6 +142,19 @@ public class BatchAgent extends NIOClient {
                         }
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (channel.isActive()) {
+                        channel.writeAndFlush(PingPacket.create());
+                        Thread.sleep(random.nextInt(30000));
+                    }
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }

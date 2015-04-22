@@ -21,8 +21,6 @@ public abstract class Packet {
     public static final Charset charset = Charset.forName("UTF-8");
     public static final int LIMIT_STRING_LIST_SIZE = Short.MAX_VALUE;
 
-    public abstract int getId();
-
     public abstract void write(ByteBuf buf) throws IOException;
 
     public abstract Packet read(ByteBuf buf) throws IOException;

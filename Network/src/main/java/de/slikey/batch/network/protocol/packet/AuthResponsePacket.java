@@ -10,16 +10,16 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 20.04.2015
  */
-public class Packet8AuthResponse extends Packet {
+public class AuthResponsePacket extends Packet {
 
     private AuthResponseCode code;
     private String message;
 
-    public Packet8AuthResponse() {
+    public AuthResponsePacket() {
 
     }
 
-    public Packet8AuthResponse(AuthResponseCode code, String message) {
+    public AuthResponsePacket(AuthResponseCode code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -38,11 +38,6 @@ public class Packet8AuthResponse extends Packet {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    @Override
-    public int getId() {
-        return 8;
     }
 
     @Override
@@ -69,6 +64,14 @@ public class Packet8AuthResponse extends Packet {
     @Override
     public void handle(PacketHandler packetListener) {
         packetListener.handle(this);
+    }
+
+    @Override
+    public String toString() {
+        return "AuthResponsePacket{" +
+                "code=" + code +
+                ", message='" + message + '\'' +
+                '}';
     }
 
     public static enum AuthResponseCode {

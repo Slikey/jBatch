@@ -1,6 +1,7 @@
 package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.controller.BatchController;
+import de.slikey.batch.network.protocol.Packet;
 import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
@@ -42,4 +43,9 @@ public class AgentManager {
         return agents.values();
     }
 
+    public void broadcast(Packet packet) {
+        for (Agent agent : agents.values()) {
+            agent.sendPacket(packet);
+        }
+    }
 }

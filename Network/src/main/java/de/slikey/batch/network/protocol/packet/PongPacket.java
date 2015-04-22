@@ -5,22 +5,27 @@ import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author Kevin Carstens
  * @since 14.04.2015
  */
-public class Packet4Ping extends Packet {
+public class PongPacket extends Packet {
 
-    private long sentTime;
-    private byte[] bytes;
-
-    public Packet4Ping() {
+    public static PongPacket create(PingPacket pingPacket) {
+        return new PongPacket(pingPacket.getSentTime(), System.nanoTime(), pingPacket.getBytes());
     }
 
-    public Packet4Ping(long sentTime, byte[] bytes) {
+    private long sentTime;
+    private long receiveTime;
+    private byte[] bytes;
+
+    public PongPacket() {
+    }
+
+    public PongPacket(long sentTime, long receiveTime, byte[] bytes) {
         this.sentTime = sentTime;
+        this.receiveTime = receiveTime;
         this.bytes = bytes;
     }
 
@@ -32,6 +37,14 @@ public class Packet4Ping extends Packet {
         this.sentTime = sentTime;
     }
 
+    public long getRecieveTime() {
+        return receiveTime;
+    }
+
+    public void setRecieveTime(long recieveTime) {
+        this.receiveTime = recieveTime;
+    }
+
     public byte[] getBytes() {
         return bytes;
     }
@@ -40,20 +53,21 @@ public class Packet4Ping extends Packet {
         this.bytes = bytes;
     }
 
-    @Override
-    public int getId() {
-        return 4;
+    public double getPing() {
+        return (receiveTime - sentTime) / 1E9;
     }
 
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
+        buf.writeLong(receiveTime);
         writeByteArray(buf, bytes);
     }
 
     @Override
     public Packet read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
+        receiveTime = buf.readLong();
         bytes = readByteArray(buf);
         return this;
     }
@@ -65,10 +79,11 @@ public class Packet4Ping extends Packet {
 
     @Override
     public String toString() {
-        return "Packet4Ping{" +
+        return "PongPacket{" +
                 "sentTime=" + sentTime +
-                ", bytes=" + Arrays.toString(bytes) +
+                ", receiveTime=" + receiveTime +
+                ", bytes=" + bytes.length +
+                ", ping=" + getPing() +
                 '}';
     }
-
 }

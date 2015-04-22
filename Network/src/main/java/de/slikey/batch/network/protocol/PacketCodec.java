@@ -15,7 +15,7 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Packet packet, ByteBuf byteBuf) throws Exception {
         ByteBuf alloc = channelHandlerContext.alloc().buffer();
-        Packet.writeVarInt(alloc, packet.getId());
+        Packet.writeVarInt(alloc, Protocol.getId(packet.getClass()));
         packet.write(alloc);
 
         int length = alloc.readableBytes();
@@ -40,7 +40,7 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
             } else {
                 // All data is received
                 int packetId = Packet.readVarInt(byteBuf);
-                Packet packet = Protocol.byId(packetId);
+                Packet packet = Protocol.getPacket(packetId);
                 packet.read(byteBuf);
                 list.add(packet);
             }

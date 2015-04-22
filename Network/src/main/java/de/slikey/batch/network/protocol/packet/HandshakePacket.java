@@ -10,14 +10,14 @@ import java.io.IOException;
  * @author Kevin
  * @since 24.03.2015
  */
-public class Packet1Handshake extends Packet {
+public class HandshakePacket extends Packet {
 
     private int version;
 
-    public Packet1Handshake() {
+    public HandshakePacket() {
     }
 
-    public Packet1Handshake(int version) {
+    public HandshakePacket(int version) {
         this.version = version;
     }
 
@@ -30,17 +30,12 @@ public class Packet1Handshake extends Packet {
     }
 
     @Override
-    public int getId() {
-        return 1;
-    }
-
-    @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeInt(version);
     }
 
     @Override
-    public Packet1Handshake read(ByteBuf buf) throws IOException {
+    public HandshakePacket read(ByteBuf buf) throws IOException {
         version = buf.readInt();
         return this;
     }
@@ -52,7 +47,7 @@ public class Packet1Handshake extends Packet {
 
     @Override
     public String toString() {
-        return "Packet1Handshake {"
+        return "HandshakePacket{"
                 + "version=" + version
                 + "}";
     }

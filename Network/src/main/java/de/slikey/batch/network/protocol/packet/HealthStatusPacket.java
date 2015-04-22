@@ -13,7 +13,7 @@ import java.lang.management.*;
  * @author Kevin Carstens
  * @since 19.04.2015
  */
-public class Packet2HealthStatus extends Packet {
+public class HealthStatusPacket extends Packet {
 
     private static final OperatingSystemMXBean systemBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
     private static final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
@@ -21,8 +21,8 @@ public class Packet2HealthStatus extends Packet {
     private static final ThreadMXBean threadBean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
     private static final ClassLoadingMXBean classBean = ManagementFactory.getClassLoadingMXBean();
 
-    public static Packet2HealthStatus create() {
-        Packet2HealthStatus packet = new Packet2HealthStatus();
+    public static HealthStatusPacket create() {
+        HealthStatusPacket packet = new HealthStatusPacket();
 
         packet.committedVirtualMemorySize = systemBean.getCommittedVirtualMemorySize();
         packet.freePhysicalMemorySize = systemBean.getFreePhysicalMemorySize();
@@ -90,13 +90,220 @@ public class Packet2HealthStatus extends Packet {
     private long totalLoadedClassCount;
     private long unloadedClassCount;
 
-    public Packet2HealthStatus() {
+    public HealthStatusPacket() {
 
     }
 
-    @Override
-    public int getId() {
-        return 2;
+    public static OperatingSystemMXBean getSystemBean() {
+        return systemBean;
+    }
+
+    public static RuntimeMXBean getRuntimeBean() {
+        return runtimeBean;
+    }
+
+    public static MemoryMXBean getMemoryBean() {
+        return memoryBean;
+    }
+
+    public static ThreadMXBean getThreadBean() {
+        return threadBean;
+    }
+
+    public static ClassLoadingMXBean getClassBean() {
+        return classBean;
+    }
+
+    public long getCommittedVirtualMemorySize() {
+        return committedVirtualMemorySize;
+    }
+
+    public void setCommittedVirtualMemorySize(long committedVirtualMemorySize) {
+        this.committedVirtualMemorySize = committedVirtualMemorySize;
+    }
+
+    public long getFreePhysicalMemorySize() {
+        return freePhysicalMemorySize;
+    }
+
+    public void setFreePhysicalMemorySize(long freePhysicalMemorySize) {
+        this.freePhysicalMemorySize = freePhysicalMemorySize;
+    }
+
+    public long getFreeSwapSpaceSize() {
+        return freeSwapSpaceSize;
+    }
+
+    public void setFreeSwapSpaceSize(long freeSwapSpaceSize) {
+        this.freeSwapSpaceSize = freeSwapSpaceSize;
+    }
+
+    public double getProcessCpuLoad() {
+        return processCpuLoad;
+    }
+
+    public void setProcessCpuLoad(double processCpuLoad) {
+        this.processCpuLoad = processCpuLoad;
+    }
+
+    public long getProcessCpuTime() {
+        return processCpuTime;
+    }
+
+    public void setProcessCpuTime(long processCpuTime) {
+        this.processCpuTime = processCpuTime;
+    }
+
+    public double getSystemCpuLoad() {
+        return systemCpuLoad;
+    }
+
+    public void setSystemCpuLoad(double systemCpuLoad) {
+        this.systemCpuLoad = systemCpuLoad;
+    }
+
+    public long getTotalPhysicalMemorySize() {
+        return totalPhysicalMemorySize;
+    }
+
+    public void setTotalPhysicalMemorySize(long totalPhysicalMemorySize) {
+        this.totalPhysicalMemorySize = totalPhysicalMemorySize;
+    }
+
+    public long getTotalSwapSpaceSize() {
+        return totalSwapSpaceSize;
+    }
+
+    public void setTotalSwapSpaceSize(long totalSwapSpaceSize) {
+        this.totalSwapSpaceSize = totalSwapSpaceSize;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getVmVersion() {
+        return vmVersion;
+    }
+
+    public void setVmVersion(String vmVersion) {
+        this.vmVersion = vmVersion;
+    }
+
+    public long getUptime() {
+        return uptime;
+    }
+
+    public void setUptime(long uptime) {
+        this.uptime = uptime;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public MemoryUsage getHeapMemoryUsage() {
+        return heapMemoryUsage;
+    }
+
+    public void setHeapMemoryUsage(MemoryUsage heapMemoryUsage) {
+        this.heapMemoryUsage = heapMemoryUsage;
+    }
+
+    public MemoryUsage getNonHeapMemoryUsage() {
+        return nonHeapMemoryUsage;
+    }
+
+    public void setNonHeapMemoryUsage(MemoryUsage nonHeapMemoryUsage) {
+        this.nonHeapMemoryUsage = nonHeapMemoryUsage;
+    }
+
+    public int getObjectPendingFinalizationCount() {
+        return objectPendingFinalizationCount;
+    }
+
+    public void setObjectPendingFinalizationCount(int objectPendingFinalizationCount) {
+        this.objectPendingFinalizationCount = objectPendingFinalizationCount;
+    }
+
+    public long getCurrentThreadCpuTime() {
+        return currentThreadCpuTime;
+    }
+
+    public void setCurrentThreadCpuTime(long currentThreadCpuTime) {
+        this.currentThreadCpuTime = currentThreadCpuTime;
+    }
+
+    public long getCurrentThreadUserTime() {
+        return currentThreadUserTime;
+    }
+
+    public void setCurrentThreadUserTime(long currentThreadUserTime) {
+        this.currentThreadUserTime = currentThreadUserTime;
+    }
+
+    public int getThreadCount() {
+        return threadCount;
+    }
+
+    public void setThreadCount(int threadCount) {
+        this.threadCount = threadCount;
+    }
+
+    public int getDaemonThreadCount() {
+        return daemonThreadCount;
+    }
+
+    public void setDaemonThreadCount(int daemonThreadCount) {
+        this.daemonThreadCount = daemonThreadCount;
+    }
+
+    public int getPeakThreadCount() {
+        return peakThreadCount;
+    }
+
+    public void setPeakThreadCount(int peakThreadCount) {
+        this.peakThreadCount = peakThreadCount;
+    }
+
+    public long getTotalStartedThreadCount() {
+        return totalStartedThreadCount;
+    }
+
+    public void setTotalStartedThreadCount(long totalStartedThreadCount) {
+        this.totalStartedThreadCount = totalStartedThreadCount;
+    }
+
+    public int getLoadedClassCount() {
+        return loadedClassCount;
+    }
+
+    public void setLoadedClassCount(int loadedClassCount) {
+        this.loadedClassCount = loadedClassCount;
+    }
+
+    public long getTotalLoadedClassCount() {
+        return totalLoadedClassCount;
+    }
+
+    public void setTotalLoadedClassCount(long totalLoadedClassCount) {
+        this.totalLoadedClassCount = totalLoadedClassCount;
+    }
+
+    public long getUnloadedClassCount() {
+        return unloadedClassCount;
+    }
+
+    public void setUnloadedClassCount(long unloadedClassCount) {
+        this.unloadedClassCount = unloadedClassCount;
     }
 
     @Override
@@ -192,7 +399,7 @@ public class Packet2HealthStatus extends Packet {
 
     @Override
     public String toString() {
-        return "Packet2HealthStatus{" +
+        return "HealthStatusPacket{" +
                 "committedVirtualMemorySize=" + committedVirtualMemorySize +
                 ", freePhysicalMemorySize=" + freePhysicalMemorySize +
                 ", freeSwapSpaceSize=" + freeSwapSpaceSize +

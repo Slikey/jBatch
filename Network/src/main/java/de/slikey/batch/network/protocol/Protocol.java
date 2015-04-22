@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 /**
  * @author Kevin Carstens
@@ -15,31 +16,38 @@ public class Protocol {
 
     private static final Logger logger = LogManager.getLogger(Protocol.class);
     private static final Constructor[] packets = new Constructor[Byte.MAX_VALUE];
+    private static final ArrayList<Class<? extends Packet>> packetIds = new ArrayList<>();
     private static boolean initialized = false;
 
     public static void initialize() {
-        register(Packet1Handshake.class);
-        register(Packet2HealthStatus.class);
-        register(Packet4Ping.class);
-        register(Packet5Pong.class);
-        register(Packet6KeepAlive.class);
-        register(Packet8AuthResponse.class);
+        register(HandshakePacket.class);
+        register(HealthStatusPacket.class);
+        register(PingPacket.class);
+        register(PongPacket.class);
+        register(KeepAlivePacket.class);
+        register(AuthResponsePacket.class);
 
-        register(Packet40AgentInformation.class);
+        register(AgentInformationPacket.class);
 
         initialized = true;
     }
 
     private static void register(Class<? extends Packet> clazz) {
         try {
-            Packet packet = clazz.newInstance();
-            packets[packet.getId()] = clazz.getConstructor();
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            Constructor<?> constructor = clazz.getConstructor();
+            constructor.setAccessible(true);
+            packetIds.add(clazz);
+            packets[packetIds.indexOf(clazz)] = constructor;
+        } catch (NoSuchMethodException e) {
             logger.error(e);
         }
     }
 
-    public static Packet byId(int id) throws BadPacketException {
+    public static int getId(Class<? extends Packet> clazz) {
+        return packetIds.indexOf(clazz);
+    }
+
+    public static Packet getPacket(int id) throws BadPacketException {
         if (!initialized) {
             throw new IllegalStateException("Protocol has not been initialized!");
         }
