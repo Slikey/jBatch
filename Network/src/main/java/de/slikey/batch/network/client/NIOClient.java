@@ -15,6 +15,8 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+
 /**
  * @author Kevin
  * @since 23.03.2015
@@ -52,7 +54,7 @@ public abstract class NIOClient {
 
             connect();
             startClient();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         } finally {
             eventLoopGroup.shutdownGracefully();

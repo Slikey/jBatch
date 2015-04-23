@@ -33,16 +33,20 @@ public class ControllerConnectionHandler extends ConnectionHandler {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
         agent = new Agent(ctx.channel());
         agent.connected();
         initializer.getBatchController().getAgentManager().addAgent(agent);
+        logger.info(">> Connected new Agent! (" + ctx.channel().remoteAddress() + ")");
+
+        super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         initializer.getBatchController().getAgentManager().removeAgent(ctx.channel());
         agent.disconnected();
+        logger.info("<< Disconnected Agent! (" + ctx.channel().remoteAddress() + ")");
+
         super.channelInactive(ctx);
     }
 

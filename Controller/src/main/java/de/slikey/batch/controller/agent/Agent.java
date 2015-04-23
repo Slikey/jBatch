@@ -2,6 +2,7 @@ package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.Packet;
+import de.slikey.batch.network.protocol.Protocol;
 import de.slikey.batch.network.protocol.packet.AgentInformationPacket;
 import de.slikey.batch.network.protocol.packet.AuthResponsePacket;
 import de.slikey.batch.network.protocol.packet.HandshakePacket;
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 public class Agent {
 
     private static final Logger logger = LogManager.getLogger(Agent.class);
-    private static final int VERSION = 1;
 
     private final Channel channel;
     private final HealthMonitor healthMonitor;
@@ -63,7 +63,7 @@ public class Agent {
 
     public void connected() {
         logger.info("cc Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
-        channel.writeAndFlush(new HandshakePacket(VERSION));
+        channel.writeAndFlush(new HandshakePacket(Protocol.getProtocolHash()));
         state = AgentState.AUTHENTICATE;
     }
 

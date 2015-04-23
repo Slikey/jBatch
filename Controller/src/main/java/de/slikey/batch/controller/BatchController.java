@@ -1,10 +1,12 @@
 package de.slikey.batch.controller;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import de.slikey.batch.controller.agent.Agent;
 import de.slikey.batch.controller.agent.AgentManager;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.packet.HealthStatusPacket;
+import de.slikey.batch.network.protocol.packet.JobExecutePacket;
 import de.slikey.batch.network.server.NIOServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,7 +55,7 @@ public class BatchController extends NIOServer {
                 logger.info("Starting Application: Monitoring Health");
                 long lastUptimeReport = Long.MIN_VALUE;
                 try {
-                    DateFormat dateFormat = new SimpleDateFormat("EE 'the' dd.MM.YY 'at' HH:mm:ss zzz");
+                    DateFormat dateFormat = new SimpleDateFormat("EEEE 'the' dd.MM.YY 'at' HH:mm:ss zzz");
                     String started = dateFormat.format(new Date());
                     while (true) {
                         HealthStatusPacket packet = HealthStatusPacket.create();
@@ -72,6 +75,20 @@ public class BatchController extends NIOServer {
                         healthMonitor.addHealthStatus(packet);
                         Thread.sleep(1000);
                     }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(7234);
+                    JobExecutePacket packet = new JobExecutePacket(UUID.randomUUID(), "sh job_ua4822.sh -range A-G");
+                    Agent agent = agentManager.getHealthBalancer().getHealthiestAgent();
+                    logger.info("Sending job to worker '" + agent.getInformation().getName() + "': " + packet);
+                    agent.sendPacket(packet);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

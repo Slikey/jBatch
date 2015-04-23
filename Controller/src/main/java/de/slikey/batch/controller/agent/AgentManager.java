@@ -5,9 +5,7 @@ import de.slikey.batch.network.protocol.Packet;
 import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Kevin Carstens
@@ -17,10 +15,12 @@ public class AgentManager {
 
     private final BatchController batchController;
     private final Map<SocketAddress, Agent> agents;
+    private final AgentHealthBalancer healthBalancer;
 
     public AgentManager(BatchController batchController) {
         this.batchController = batchController;
         this.agents = new HashMap<>();
+        this.healthBalancer = new AgentHealthBalancer(this);
     }
 
     public void addAgent(Agent agent) {
@@ -39,8 +39,12 @@ public class AgentManager {
         return batchController;
     }
 
-    public Collection<Agent> getAgents() {
-        return agents.values();
+    public List<Agent> getAgents() {
+        return new ArrayList<>(agents.values());
+    }
+
+    public AgentHealthBalancer getHealthBalancer() {
+        return healthBalancer;
     }
 
     public void broadcast(Packet packet) {

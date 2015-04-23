@@ -18,18 +18,6 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(ConnectionHandler.class);
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        logger.info(">> Connected new Agent! (" + ctx.channel().remoteAddress() + ")");
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        logger.info("<< Disconnected Agent! (" + ctx.channel().remoteAddress() + ")");
-
-        super.channelInactive(ctx);
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (ctx.channel().isActive()) {
             String address = ctx.channel().remoteAddress().toString();

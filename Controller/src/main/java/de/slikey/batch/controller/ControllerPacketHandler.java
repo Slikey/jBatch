@@ -2,6 +2,8 @@ package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.network.protocol.packet.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Kevin Carstens
@@ -9,6 +11,7 @@ import de.slikey.batch.network.protocol.packet.*;
  */
 public class ControllerPacketHandler extends PacketHandler {
 
+    private static final Logger logger = LogManager.getLogger(ControllerPacketHandler.class);
     private final ControllerConnectionHandler connectionHandler;
 
     public ControllerPacketHandler(ControllerConnectionHandler connectionHandler) {
@@ -26,12 +29,13 @@ public class ControllerPacketHandler extends PacketHandler {
 
     @Override
     public void handle(PingPacket packet) {
+        logger.debug(packet);
         connectionHandler.getAgent().sendPacket(PongPacket.create(packet));
     }
 
     @Override
     public void handle(PongPacket packet) {
-        System.out.println(packet);
+        logger.debug(packet);
     }
 
     @Override
@@ -42,5 +46,10 @@ public class ControllerPacketHandler extends PacketHandler {
     @Override
     public void handle(AgentInformationPacket packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
+    }
+
+    @Override
+    public void handle(JobResponsePacket packet) {
+        logger.info("Job was completed: " + packet);
     }
 }

@@ -48,4 +48,10 @@ public class PacketHandler extends ChannelHandlerAdapter {
         error(packet);
     }
 
+    public void handle(JobExecutePacket packet) { error(packet);}
+
+    public void handle(JobResponsePacket packet) {
+        error(packet);
+    }
+
 }

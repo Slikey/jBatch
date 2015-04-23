@@ -6,7 +6,6 @@ import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 /**
  * @author Kevin Carstens
@@ -21,6 +20,7 @@ public class PingPacket extends Packet {
         return new PingPacket(System.nanoTime(), bytes);
     }
 
+    private long receivedTime;
     private long sentTime;
     private byte[] bytes;
 
@@ -48,6 +48,14 @@ public class PingPacket extends Packet {
         this.bytes = bytes;
     }
 
+    public long getReceivedTime() {
+        return receivedTime;
+    }
+
+    public double getPing() {
+        return (receivedTime - sentTime) / 1E9;
+    }
+
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
@@ -58,6 +66,7 @@ public class PingPacket extends Packet {
     public Packet read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
         bytes = readByteArray(buf);
+        receivedTime = System.nanoTime();
         return this;
     }
 
@@ -70,7 +79,9 @@ public class PingPacket extends Packet {
     public String toString() {
         return "PingPacket{" +
                 "sentTime=" + sentTime +
-                ", bytes=" + Arrays.toString(bytes) +
+                ", receivedTime=" + receivedTime +
+                ", bytes=" + bytes.length +
+                ", ping=" + getPing() +
                 '}';
     }
 

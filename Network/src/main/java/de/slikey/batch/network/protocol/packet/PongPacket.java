@@ -13,19 +13,19 @@ import java.io.IOException;
 public class PongPacket extends Packet {
 
     public static PongPacket create(PingPacket pingPacket) {
-        return new PongPacket(pingPacket.getSentTime(), System.nanoTime(), pingPacket.getBytes());
+        return new PongPacket(pingPacket.getSentTime(), pingPacket.getReceivedTime(), pingPacket.getBytes());
     }
 
     private long sentTime;
-    private long receiveTime;
+    private long receivedTime;
     private byte[] bytes;
 
     public PongPacket() {
     }
 
-    public PongPacket(long sentTime, long receiveTime, byte[] bytes) {
+    public PongPacket(long sentTime, long receivedTime, byte[] bytes) {
         this.sentTime = sentTime;
-        this.receiveTime = receiveTime;
+        this.receivedTime = receivedTime;
         this.bytes = bytes;
     }
 
@@ -37,12 +37,12 @@ public class PongPacket extends Packet {
         this.sentTime = sentTime;
     }
 
-    public long getRecieveTime() {
-        return receiveTime;
+    public long getRecievedTime() {
+        return receivedTime;
     }
 
-    public void setRecieveTime(long recieveTime) {
-        this.receiveTime = recieveTime;
+    public void setRecievedTime(long recievedTime) {
+        this.receivedTime = receivedTime;
     }
 
     public byte[] getBytes() {
@@ -54,20 +54,20 @@ public class PongPacket extends Packet {
     }
 
     public double getPing() {
-        return (receiveTime - sentTime) / 1E9;
+        return (receivedTime - sentTime) / 1E9;
     }
 
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
-        buf.writeLong(receiveTime);
+        buf.writeLong(receivedTime);
         writeByteArray(buf, bytes);
     }
 
     @Override
     public Packet read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
-        receiveTime = buf.readLong();
+        receivedTime = buf.readLong();
         bytes = readByteArray(buf);
         return this;
     }
@@ -81,7 +81,7 @@ public class PongPacket extends Packet {
     public String toString() {
         return "PongPacket{" +
                 "sentTime=" + sentTime +
-                ", receiveTime=" + receiveTime +
+                ", receiveTime=" + receivedTime +
                 ", bytes=" + bytes.length +
                 ", ping=" + getPing() +
                 '}';

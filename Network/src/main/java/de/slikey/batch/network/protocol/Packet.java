@@ -25,6 +25,9 @@ public abstract class Packet {
 
     public abstract Packet read(ByteBuf buf) throws IOException;
 
+    @Override
+    public abstract String toString();
+
     public static void writeUUID(ByteBuf buf, UUID uuid) {
         buf.writeLong(uuid.getMostSignificantBits());
         buf.writeLong(uuid.getLeastSignificantBits());
