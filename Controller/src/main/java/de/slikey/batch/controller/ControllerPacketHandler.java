@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ControllerPacketHandler extends PacketHandler {
 
-    private static final Logger logger = LogManager.getLogger(ControllerPacketHandler.class);
+    private static final Logger logger = LogManager.getLogger(ControllerPacketHandler.class.getSimpleName());
     private final ControllerConnectionHandler connectionHandler;
 
     public ControllerPacketHandler(ControllerConnectionHandler connectionHandler) {

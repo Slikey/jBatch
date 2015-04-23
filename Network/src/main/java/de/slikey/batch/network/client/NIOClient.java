@@ -3,7 +3,6 @@ package de.slikey.batch.network.client;
 import de.slikey.batch.network.client.listener.StartClientListener;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.Protocol;
-import de.slikey.batch.network.server.NIOServer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -23,7 +22,7 @@ import java.io.IOException;
  */
 public abstract class NIOClient {
 
-    private static final Logger logger = LogManager.getLogger(NIOServer.class);
+    private static final Logger logger = LogManager.getLogger(NIOClient.class.getSimpleName());
 
     private final String host;
     private final int port;

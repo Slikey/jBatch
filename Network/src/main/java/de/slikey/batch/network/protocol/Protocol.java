@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class Protocol {
 
-    private static final Logger logger = LogManager.getLogger(Protocol.class);
+    private static final Logger logger = LogManager.getLogger(Protocol.class.getSimpleName());
     private static final Constructor[] packets = new Constructor[Byte.MAX_VALUE];
     private static final ArrayList<Class<? extends Packet>> packetIds = new ArrayList<>();
     private static int protocolHash = 0;

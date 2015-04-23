@@ -21,7 +21,7 @@ import java.io.IOException;
  */
 public abstract class NIOServer {
 
-    private static final Logger logger = LogManager.getLogger(NIOServer.class);
+    private static final Logger logger = LogManager.getLogger(NIOServer.class.getSimpleName());
 
     private final int port;
     private EventLoopGroup bossLoop, workerLoop;

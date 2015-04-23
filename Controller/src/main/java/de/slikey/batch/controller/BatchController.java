@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
  */
 public class BatchController extends NIOServer {
 
-    private static final Logger logger = LogManager.getLogger(BatchController.class);
+    private static final Logger logger = LogManager.getLogger(BatchController.class.getSimpleName());
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
             .setNameFormat("BatchController-%s")

@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
  */
 public class BatchAgent extends NIOClient {
 
-    private static final Logger logger = LogManager.getLogger(BatchAgent.class);
+    private static final Logger logger = LogManager.getLogger(BatchAgent.class.getSimpleName());
     public static final int VERSION = 1;
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
@@ -52,13 +52,13 @@ public class BatchAgent extends NIOClient {
 
                     @Override
                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                        logger.info(">> Connected to Controller! (" + ctx.channel().remoteAddress() + ")");
+                        logger.info("Connected to Controller! (" + ctx.channel().remoteAddress() + ")");
                         super.channelActive(ctx);
                     }
 
                     @Override
                     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                        logger.info(">> Disconnected from Controller! (" + ctx.channel().remoteAddress() + ")");
+                        logger.info("Disconnected from Controller! (" + ctx.channel().remoteAddress() + ")");
                         super.channelInactive(ctx);
                     }
 
@@ -79,12 +79,12 @@ public class BatchAgent extends NIOClient {
 
                             @Override
                             public void handle(HandshakePacket packet) {
-                                logger.info("cc Received handshake..");
+                                logger.info("Received handshake..");
                                 if (packet.getVersion() == Protocol.getProtocolHash()) {
-                                    logger.info("cc Versions match! Sending auth-information...");
+                                    logger.info("Versions match! Sending auth-information...");
                                     socketChannel.writeAndFlush(new AgentInformationPacket(AgentInformationPacket.USERNAME, AgentInformationPacket.PASSWORD));
                                 } else {
-                                    logger.info("cc Versions mismatch! Shutting down!");
+                                    logger.info("Versions mismatch! Shutting down!");
                                     System.exit(0);
                                 }
                             }
@@ -92,9 +92,9 @@ public class BatchAgent extends NIOClient {
                             @Override
                             public void handle(AuthResponsePacket packet) {
                                 if (packet.getCode() == AuthResponsePacket.AuthResponseCode.SUCCESS) {
-                                    logger.info("cc Authentication successful!");
+                                    logger.info("Authentication successful!");
                                 } else {
-                                    logger.info("cc Authentication unsuccessful! Shutting down...");
+                                    logger.info("Authentication unsuccessful! Shutting down...");
                                     System.exit(0);
                                 }
                             }

@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public abstract class ConnectionHandler extends ChannelHandlerAdapter {
 
-    private static final Logger logger = LogManager.getLogger(ConnectionHandler.class);
+    private static final Logger logger = LogManager.getLogger(ConnectionHandler.class.getSimpleName());
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {

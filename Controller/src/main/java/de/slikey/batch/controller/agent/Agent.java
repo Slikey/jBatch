@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class Agent {
 
-    private static final Logger logger = LogManager.getLogger(Agent.class);
+    private static final Logger logger = LogManager.getLogger(Agent.class.getSimpleName());
 
     private final Channel channel;
     private final HealthMonitor healthMonitor;
@@ -62,7 +62,7 @@ public class Agent {
     }
 
     public void connected() {
-        logger.info("cc Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
+        logger.info("Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
         channel.writeAndFlush(new HandshakePacket(Protocol.getProtocolHash()));
         state = AgentState.AUTHENTICATE;
     }
@@ -77,12 +77,12 @@ public class Agent {
 
     public void handleAgentInformation(AgentInformationPacket packet) {
         information = packet;
-        logger.info("cc Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+        logger.info("Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
 
         AuthResponsePacket response = new AuthResponsePacket();
         if (packet.getName().equals(AgentInformationPacket.USERNAME) && packet.getPassword().equals(AgentInformationPacket.PASSWORD)) {
             // Authentication successful
-            logger.info("cc Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
+            logger.info("Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.WORKING;
             response.setCode(AuthResponsePacket.AuthResponseCode.SUCCESS);
             response.setMessage("OK");

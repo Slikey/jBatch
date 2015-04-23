@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class StartServerListener implements GenericFutureListener<Future<Void>> {
 
-    private static final Logger logger = LogManager.getLogger(NIOServer.class);
+    private static final Logger logger = LogManager.getLogger(NIOServer.class.getSimpleName());
 
     private final NIOServer server;
 

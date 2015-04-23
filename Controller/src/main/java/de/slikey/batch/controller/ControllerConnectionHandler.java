@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ControllerConnectionHandler extends ConnectionHandler {
 
-    private static final Logger logger = LogManager.getLogger(ControllerConnectionHandler.class);
+    private static final Logger logger = LogManager.getLogger(ControllerConnectionHandler.class.getSimpleName());
 
     private final ControllerPacketChannelInitializer initializer;
     private Agent agent;
@@ -36,7 +36,7 @@ public class ControllerConnectionHandler extends ConnectionHandler {
         agent = new Agent(ctx.channel());
         agent.connected();
         initializer.getBatchController().getAgentManager().addAgent(agent);
-        logger.info(">> Connected new Agent! (" + ctx.channel().remoteAddress() + ")");
+        logger.info("Connected new Agent! (" + ctx.channel().remoteAddress() + ")");
 
         super.channelActive(ctx);
     }
@@ -45,7 +45,7 @@ public class ControllerConnectionHandler extends ConnectionHandler {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         initializer.getBatchController().getAgentManager().removeAgent(ctx.channel());
         agent.disconnected();
-        logger.info("<< Disconnected Agent! (" + ctx.channel().remoteAddress() + ")");
+        logger.info("Disconnected Agent! (" + ctx.channel().remoteAddress() + ")");
 
         super.channelInactive(ctx);
     }
