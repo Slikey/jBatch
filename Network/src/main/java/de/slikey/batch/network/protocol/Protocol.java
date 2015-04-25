@@ -6,8 +6,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -41,7 +43,6 @@ public class Protocol {
             }
         }
         report = report.substring(0, report.length() - 2) + "\n}";
-        protocolHash = report.hashCode();
 
         logger.debug(report + " (Hash: " + protocolHash + ")");
         initialized = true;
@@ -55,6 +56,18 @@ public class Protocol {
             packetIds.add(clazz);
             int index = packetIds.indexOf(clazz);
             packets[index] = constructor;
+
+            protocolHash = 31 * protocolHash + index;
+            Field[] declaredFields = clazz.getDeclaredFields();
+            String[] variableDeclarations = new String[declaredFields.length];
+            for (int i = 0; i < declaredFields.length; i++) {
+                variableDeclarations[i] = declaredFields[i].toString();
+            }
+            Arrays.sort(variableDeclarations);
+            for (String string : variableDeclarations) {
+                protocolHash = 31 * protocolHash + string.hashCode();
+            }
+
             return index;
         } catch (NoSuchMethodException e) {
             logger.error("Could not find empty Constructor for " + clazz.getSimpleName(), e);

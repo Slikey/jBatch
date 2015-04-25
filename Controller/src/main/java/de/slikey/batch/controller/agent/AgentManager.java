@@ -52,4 +52,8 @@ public class AgentManager {
             agent.sendPacket(packet);
         }
     }
+
+    public void tick() {
+
+    }
 }

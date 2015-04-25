@@ -80,7 +80,7 @@ public class Agent {
         logger.info("Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
 
         AuthResponsePacket response = new AuthResponsePacket();
-        if (packet.getName().equals(AgentInformationPacket.USERNAME) && packet.getPassword().equals(AgentInformationPacket.PASSWORD)) {
+        if (!packet.getName().isEmpty() && packet.getPassword().equals(AgentInformationPacket.PASSWORD)) {
             // Authentication successful
             logger.info("Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.WORKING;

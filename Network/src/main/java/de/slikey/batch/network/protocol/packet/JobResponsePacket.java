@@ -25,6 +25,22 @@ public class JobResponsePacket extends Packet {
         this.returnCode = returnCode;
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public int getReturnCode() {
+        return returnCode;
+    }
+
+    public void setReturnCode(int returnCode) {
+        this.returnCode = returnCode;
+    }
+
     @Override
     public void write(ByteBuf buf) throws IOException {
         writeUUID(buf, uuid);

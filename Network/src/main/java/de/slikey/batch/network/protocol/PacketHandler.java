@@ -54,4 +54,6 @@ public class PacketHandler extends ChannelHandlerAdapter {
         error(packet);
     }
 
+    public void handle(ExceptionPacket packet) { error(packet); }
+
 }

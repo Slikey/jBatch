@@ -1,12 +1,15 @@
 package de.slikey.batch.controller;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import de.slikey.batch.controller.agent.Agent;
 import de.slikey.batch.controller.agent.AgentManager;
+import de.slikey.batch.controller.job.Job;
+import de.slikey.batch.controller.job.JobManager;
+import de.slikey.batch.controller.job.JobResponseCallback;
+import de.slikey.batch.controller.job.JobScheduleInformation;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.packet.HealthStatusPacket;
-import de.slikey.batch.network.protocol.packet.JobExecutePacket;
+import de.slikey.batch.network.protocol.packet.JobResponsePacket;
 import de.slikey.batch.network.server.NIOServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,11 +38,13 @@ public class BatchController extends NIOServer {
     }
 
     private final AgentManager agentManager;
+    private final JobManager jobManager;
     private final HealthMonitor healthMonitor;
 
     public BatchController(int port) {
         super(port);
         this.agentManager = new AgentManager(this);
+        this.jobManager = new JobManager(this);
         this.healthMonitor = new HealthMonitor();
     }
 
@@ -47,8 +52,34 @@ public class BatchController extends NIOServer {
         return agentManager;
     }
 
+    public JobManager getJobManager() {
+        return jobManager;
+    }
+
     @Override
     public void startApplication() {
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        try {
+                            agentManager.tick();
+                        } catch (Exception e) {
+                            logger.error("Exception occurred in AgentManager tick.", e);
+                        }
+                        try {
+                            jobManager.tick();
+                        } catch (Exception e) {
+                            logger.error("Exception occurred in JobManager tick.", e);
+                        }
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
@@ -84,11 +115,20 @@ public class BatchController extends NIOServer {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(7234);
-                    JobExecutePacket packet = new JobExecutePacket(UUID.randomUUID(), "sh job_ua4822.sh -range A-G");
-                    Agent agent = agentManager.getHealthBalancer().getHealthiestAgent();
-                    logger.info("Sending job to worker '" + agent.getInformation().getName() + "': " + packet);
-                    agent.sendPacket(packet);
+                    Random random = new Random();
+                    while (true) {
+                        Thread.sleep(random.nextInt(25000));
+                        final String command = "sh ua_" + (random.nextInt(8999) + 1000) + ".sh -range 0-" + random.nextInt(423);
+                        Job job = new Job(command, new JobResponseCallback() {
+                            @Override
+                            public void response(JobResponsePacket response) {
+                                logger.info("Job successfully executed! '" + command + "'");
+                            }
+                        });
+                        if (random.nextBoolean())
+                            job.setScheduleInformation(new JobScheduleInformation((random.nextInt(10) + 10) * 10 * 1000L));
+                        jobManager.schedule(job);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

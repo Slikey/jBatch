@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 public class BatchAgent extends NIOClient {
 
     private static final Logger logger = LogManager.getLogger(BatchAgent.class.getSimpleName());
-    public static final int VERSION = 1;
+    public static final Random RANDOM = new Random();
     public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
             .setDaemon(true)
             .setNameFormat("BatchAgent-%s")
@@ -82,7 +82,7 @@ public class BatchAgent extends NIOClient {
                                 logger.info("Received handshake..");
                                 if (packet.getVersion() == Protocol.getProtocolHash()) {
                                     logger.info("Versions match! Sending auth-information...");
-                                    socketChannel.writeAndFlush(new AgentInformationPacket(AgentInformationPacket.USERNAME, AgentInformationPacket.PASSWORD));
+                                    socketChannel.writeAndFlush(new AgentInformationPacket("Worker_" + RANDOM.nextInt(Integer.MAX_VALUE), AgentInformationPacket.PASSWORD));
                                 } else {
                                     logger.info("Versions mismatch! Shutting down!");
                                     System.exit(0);
@@ -106,7 +106,7 @@ public class BatchAgent extends NIOClient {
                                     @Override
                                     public void run() {
                                         try {
-                                            Thread.sleep(105 * 1000);
+                                            Thread.sleep(RANDOM.nextInt(30 * 1000));
                                             int returnCode = 200;
                                             logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + returnCode);
                                             socketChannel.writeAndFlush(new JobResponsePacket(packet.getUuid(), returnCode));

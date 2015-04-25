@@ -39,8 +39,12 @@ public class ControllerPacketHandler extends PacketHandler {
     }
 
     @Override
-    public void handle(KeepAlivePacket packet) {
+    public void handle(ExceptionPacket packet) {
+        logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getInformation().getName() + ")", packet.getException());
+    }
 
+    @Override
+    public void handle(KeepAlivePacket packet) {
     }
 
     @Override
@@ -50,6 +54,6 @@ public class ControllerPacketHandler extends PacketHandler {
 
     @Override
     public void handle(JobResponsePacket packet) {
-        logger.info("Job was completed: " + packet);
+        connectionHandler.getInitializer().getBatchController().getJobManager().handleJobResponse(packet);
     }
 }
