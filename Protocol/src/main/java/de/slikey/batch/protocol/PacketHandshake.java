@@ -9,15 +9,15 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 27.04.2015
  */
-public class HandshakePacket extends Packet {
+public class PacketHandshake extends Packet {
 
     private int version;
 
-    public HandshakePacket() {
+    public PacketHandshake() {
 
     }
 
-    public HandshakePacket(int version) {
+    public PacketHandshake(int version) {
         this.version = version;
     }
 

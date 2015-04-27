@@ -4,7 +4,7 @@ import de.slikey.batch.controller.job.Job;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.Protocol;
-import de.slikey.batch.protocol.HandshakePacket;
+import de.slikey.batch.protocol.PacketHandshake;
 import de.slikey.batch.protocol.PacketAgentInformation;
 import de.slikey.batch.protocol.PacketAuthResponse;
 import de.slikey.batch.protocol.PacketHealthStatus;
@@ -69,7 +69,7 @@ public class Agent {
 
     public void connected() {
         logger.info("Sending handshake to Agent... (" + channel.remoteAddress().toString() + ")");
-        channel.writeAndFlush(new HandshakePacket(Protocol.getProtocolHash()));
+        channel.writeAndFlush(new PacketHandshake(Protocol.getProtocolHash()));
         state = AgentState.AUTHENTICATE;
     }
 

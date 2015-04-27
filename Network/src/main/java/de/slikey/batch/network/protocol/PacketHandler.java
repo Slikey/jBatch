@@ -49,10 +49,10 @@ public class PacketHandler extends ChannelHandlerAdapter {
             }
         }
 
-        public void invoke(Packet packet) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        public void invoke(Packet packet) throws InvocationTargetException, IllegalAccessException {
             Method method = methods[packet.getId()];
             if (method == null)
-                throw new NoSuchMethodException("No handler for packet found. Queried: " + packet.getClass().getName());
+                return;
 
             method.invoke(PacketHandler.this, packet);
         }

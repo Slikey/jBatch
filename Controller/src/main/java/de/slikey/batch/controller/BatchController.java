@@ -6,17 +6,13 @@ import de.slikey.batch.controller.job.Job;
 import de.slikey.batch.controller.job.JobManager;
 import de.slikey.batch.controller.job.JobResponseCallback;
 import de.slikey.batch.controller.job.JobScheduleInformation;
-import de.slikey.batch.controller.monitoring.HealthMonitor;
+import de.slikey.batch.controller.monitoring.HealthManager;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.server.NIOServer;
-import de.slikey.batch.protocol.PacketHealthStatus;
 import de.slikey.batch.protocol.PacketJobResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,13 +35,13 @@ public class BatchController extends NIOServer {
 
     private final AgentManager agentManager;
     private final JobManager jobManager;
-    private final HealthMonitor healthMonitor;
+    private final HealthManager healthManager;
 
     public BatchController(int port) {
         super(port);
         this.agentManager = new AgentManager(this);
         this.jobManager = new JobManager(this);
-        this.healthMonitor = new HealthMonitor();
+        this.healthManager = new HealthManager(this);
     }
 
     public AgentManager getAgentManager() {
@@ -60,38 +56,7 @@ public class BatchController extends NIOServer {
     public void startApplication() {
         agentManager.start(THREAD_POOL);
         jobManager.start(THREAD_POOL);
-
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("Starting Application: Monitoring Health");
-                long lastUptimeReport = Long.MIN_VALUE;
-                try {
-                    DateFormat dateFormat = new SimpleDateFormat("EEEE 'the' dd.MM.YY 'at' HH:mm:ss zzz");
-                    String started = dateFormat.format(new Date());
-                    while (true) {
-                        PacketHealthStatus packet = PacketHealthStatus.create();
-                        if (packet.getSystemCpuLoad() > 0.95) {
-                            logger.warn("CPU Load is over 95%! Please check for issues! Alert. Alert.");
-                        }
-                        if (packet.getThreadCount() > 2000) {
-                            logger.warn("Running more than 2000 threads! Please check for issues! Alert. Alert.");
-                        }
-                        if (packet.getFreePhysicalMemorySize() < 0.5 * 1024 * 1024 * 1024L) {
-                            logger.warn("Less than 512MB is available on this machine! Please check for issues! Alert. Alert.");
-                        }
-                        if (packet.getUptime() > lastUptimeReport + 30 * 60 * 1000) {
-                            logger.info("Uptime-Report: " + (packet.getUptime() / (60 * 1000)) + " minutes, Launch: " + started);
-                            lastUptimeReport = packet.getUptime();
-                        }
-                        healthMonitor.addHealthStatus(packet);
-                        Thread.sleep(1000);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        healthManager.start(THREAD_POOL);
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
@@ -106,8 +71,7 @@ public class BatchController extends NIOServer {
                                 logger.info("Job successfully executed! '" + command + "'");
                             }
                         });
-                        if (random.nextBoolean())
-                            job.setScheduleInformation(new JobScheduleInformation((random.nextInt(10) + 10) * 10 * 1000L));
+                        job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 10 * 1000L));
                         jobManager.schedule(job);
                     }
                 } catch (InterruptedException e) {

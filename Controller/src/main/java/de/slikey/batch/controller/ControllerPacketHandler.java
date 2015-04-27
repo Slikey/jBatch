@@ -39,9 +39,6 @@ public class ControllerPacketHandler extends PacketHandler {
         logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getInformation().getName() + ")", packet.getException());
     }
 
-    public void handle(PacketKeepAlive packet) {
-    }
-
     public void handle(PacketAgentInformation packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
     }

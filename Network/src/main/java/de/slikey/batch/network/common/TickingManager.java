@@ -21,6 +21,8 @@ public abstract class TickingManager implements Runnable {
     }
 
     public void start(ExecutorService executorService) {
+        String name = this.getClass().getSimpleName();
+        LogManager.getLogger(name).info("Started " + name + "!");
         executorService.execute(this);
     }
 

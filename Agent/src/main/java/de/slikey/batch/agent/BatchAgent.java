@@ -75,7 +75,7 @@ public class BatchAgent extends NIOClient {
                                 logger.debug(packet);
                             }
 
-                            public void handle(HandshakePacket packet) {
+                            public void handle(PacketHandshake packet) {
                                 logger.info("Received handshake..");
                                 if (packet.getVersion() == Protocol.getProtocolHash()) {
                                     logger.info("Versions match! Sending auth-information...");
