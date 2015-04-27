@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -11,16 +10,16 @@ import java.util.UUID;
  * @author Kevin Carstens
  * @since 23.04.2015
  */
-public class JobExecutePacket extends Packet {
+public class PacketJobExecute extends Packet {
 
     private UUID uuid;
     private String command;
 
-    public JobExecutePacket() {
+    public PacketJobExecute() {
 
     }
 
-    public JobExecutePacket(UUID uuid, String command) {
+    public PacketJobExecute(UUID uuid, String command) {
         this.uuid = uuid;
         this.command = command;
     }
@@ -43,20 +42,14 @@ public class JobExecutePacket extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        writeUUID(buf, uuid);
-        writeString(buf, command);
+        Packet.writeUUID(buf, uuid);
+        Packet.writeString(buf, command);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
-        uuid = readUUID(buf);
-        command = readString(buf);
-        return this;
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
+    public void read(ByteBuf buf) throws IOException {
+        uuid = Packet.readUUID(buf);
+        command = Packet.readString(buf);
     }
 
     @Override

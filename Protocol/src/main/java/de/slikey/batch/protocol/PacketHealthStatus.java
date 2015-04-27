@@ -1,9 +1,8 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.management.ThreadMXBean;
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -13,7 +12,7 @@ import java.lang.management.*;
  * @author Kevin Carstens
  * @since 19.04.2015
  */
-public class HealthStatusPacket extends Packet {
+public class PacketHealthStatus extends Packet {
 
     private static final OperatingSystemMXBean systemBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
     private static final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
@@ -21,8 +20,8 @@ public class HealthStatusPacket extends Packet {
     private static final ThreadMXBean threadBean = (ThreadMXBean) ManagementFactory.getThreadMXBean();
     private static final ClassLoadingMXBean classBean = ManagementFactory.getClassLoadingMXBean();
 
-    public static HealthStatusPacket create() {
-        HealthStatusPacket packet = new HealthStatusPacket();
+    public static PacketHealthStatus create() {
+        PacketHealthStatus packet = new PacketHealthStatus();
 
         packet.committedVirtualMemorySize = systemBean.getCommittedVirtualMemorySize();
         packet.freePhysicalMemorySize = systemBean.getFreePhysicalMemorySize();
@@ -90,7 +89,7 @@ public class HealthStatusPacket extends Packet {
     private long totalLoadedClassCount;
     private long unloadedClassCount;
 
-    public HealthStatusPacket() {
+    public PacketHealthStatus() {
 
     }
 
@@ -319,8 +318,8 @@ public class HealthStatusPacket extends Packet {
         buf.writeLong(totalSwapSpaceSize);
 
         // Information on Runtime
-        writeString(buf, name);
-        writeString(buf, vmVersion);
+        Packet.writeString(buf, name);
+        Packet.writeString(buf, vmVersion);
         buf.writeLong(uptime);
         buf.writeLong(startTime);
 
@@ -344,7 +343,7 @@ public class HealthStatusPacket extends Packet {
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         committedVirtualMemorySize = buf.readLong();
         freePhysicalMemorySize = buf.readLong();
         freeSwapSpaceSize = buf.readLong();
@@ -354,8 +353,8 @@ public class HealthStatusPacket extends Packet {
         totalPhysicalMemorySize = buf.readLong();
         totalSwapSpaceSize = buf.readLong();
 
-        name = readString(buf);
-        vmVersion = readString(buf);
+        name = Packet.readString(buf);
+        vmVersion = Packet.readString(buf);
         uptime = buf.readLong();
         startTime = buf.readLong();
 
@@ -373,8 +372,6 @@ public class HealthStatusPacket extends Packet {
         loadedClassCount = buf.readInt();
         totalLoadedClassCount = buf.readLong();
         unloadedClassCount = buf.readLong();
-
-        return this;
     }
 
     private void writeMemoryUsage(ByteBuf buf, MemoryUsage memoryUsage) throws IOException {
@@ -390,11 +387,6 @@ public class HealthStatusPacket extends Packet {
         long committed = buf.readLong();
         long max = buf.readLong();
         return new MemoryUsage(init, used, committed, max);
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
     }
 
     @Override

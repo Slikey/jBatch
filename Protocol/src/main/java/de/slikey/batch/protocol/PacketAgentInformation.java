@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -10,18 +9,18 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 20.04.2015
  */
-public class AgentInformationPacket extends Packet {
+public class PacketAgentInformation extends Packet {
 
     public static final String PASSWORD = "hardCoreSavePasswordYo!";
 
     private String name;
     private String password;
 
-    public AgentInformationPacket() {
+    public PacketAgentInformation() {
 
     }
 
-    public AgentInformationPacket(String name, String password) {
+    public PacketAgentInformation(String name, String password) {
         this.name = name;
         this.password = password;
     }
@@ -44,20 +43,14 @@ public class AgentInformationPacket extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        writeString(buf, name);
-        writeString(buf, password);
+        Packet.writeString(buf, name);
+        Packet.writeString(buf, password);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
-        name = readString(buf);
-        password = readString(buf);
-        return this;
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
+    public void read(ByteBuf buf) throws IOException {
+        name = Packet.readString(buf);
+        password = Packet.readString(buf);
     }
 
     @Override
@@ -71,9 +64,9 @@ public class AgentInformationPacket extends Packet {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AgentInformationPacket)) return false;
+        if (!(o instanceof PacketAgentInformation)) return false;
 
-        AgentInformationPacket that = (AgentInformationPacket) o;
+        PacketAgentInformation that = (PacketAgentInformation) o;
 
         if (!name.equals(that.name)) return false;
         if (!password.equals(that.password)) return false;

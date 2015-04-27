@@ -8,9 +8,9 @@ import de.slikey.batch.controller.job.JobResponseCallback;
 import de.slikey.batch.controller.job.JobScheduleInformation;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
-import de.slikey.batch.network.protocol.packet.HealthStatusPacket;
-import de.slikey.batch.network.protocol.packet.JobResponsePacket;
 import de.slikey.batch.network.server.NIOServer;
+import de.slikey.batch.protocol.PacketHealthStatus;
+import de.slikey.batch.protocol.PacketJobResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,7 +70,7 @@ public class BatchController extends NIOServer {
                     DateFormat dateFormat = new SimpleDateFormat("EEEE 'the' dd.MM.YY 'at' HH:mm:ss zzz");
                     String started = dateFormat.format(new Date());
                     while (true) {
-                        HealthStatusPacket packet = HealthStatusPacket.create();
+                        PacketHealthStatus packet = PacketHealthStatus.create();
                         if (packet.getSystemCpuLoad() > 0.95) {
                             logger.warn("CPU Load is over 95%! Please check for issues! Alert. Alert.");
                         }
@@ -102,7 +102,7 @@ public class BatchController extends NIOServer {
                         final String command = "sh ua_" + (random.nextInt(8999) + 1000) + ".sh -range 0-" + random.nextInt(423);
                         Job job = new Job(command, new JobResponseCallback() {
                             @Override
-                            public void response(JobResponsePacket response) {
+                            public void response(PacketJobResponse response) {
                                 logger.info("Job successfully executed! '" + command + "'");
                             }
                         });

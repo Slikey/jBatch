@@ -4,7 +4,7 @@ import de.slikey.batch.controller.BatchController;
 import de.slikey.batch.controller.agent.Agent;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.packet.JobResponsePacket;
+import de.slikey.batch.protocol.PacketJobResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -68,7 +68,7 @@ public class JobManager extends TickingManager{
         }
     }
 
-    public void handleJobResponse(JobResponsePacket packet) {
+    public void handleJobResponse(PacketJobResponse packet) {
         UUID uuid = packet.getUuid();
         Job job = getJobByUUID(uuid);
         if (job == null) {
@@ -84,7 +84,7 @@ public class JobManager extends TickingManager{
         for (Job job : jobs) {
             if (job.getJobState() == JobState.EXECUTING && job.getAgent() == agent) {
                 logger.error("Agent (" + agent.getInformation().getName() + ") disconnected while working on Job (" + job.toString() + ")!");
-                handleJobResponse(new JobResponsePacket(job.getUuid(), -1));
+                handleJobResponse(new PacketJobResponse(job.getUuid(), -1));
             }
         }
     }

@@ -4,10 +4,10 @@ import de.slikey.batch.controller.job.Job;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.Protocol;
-import de.slikey.batch.network.protocol.packet.AgentInformationPacket;
-import de.slikey.batch.network.protocol.packet.AuthResponsePacket;
-import de.slikey.batch.network.protocol.packet.HandshakePacket;
-import de.slikey.batch.network.protocol.packet.HealthStatusPacket;
+import de.slikey.batch.protocol.HandshakePacket;
+import de.slikey.batch.protocol.PacketAgentInformation;
+import de.slikey.batch.protocol.PacketAuthResponse;
+import de.slikey.batch.protocol.PacketHealthStatus;
 import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +29,7 @@ public class Agent {
 
     private AgentManager agentManager;
     private AgentState state;
-    private AgentInformationPacket information;
+    private PacketAgentInformation information;
 
     public Agent(Channel channel) {
         this.channel = channel;
@@ -55,7 +55,7 @@ public class Agent {
         this.state = state;
     }
 
-    public AgentInformationPacket getInformation() {
+    public PacketAgentInformation getInformation() {
         return information;
     }
 
@@ -77,25 +77,25 @@ public class Agent {
 
     }
 
-    public void handleHealthStatus(HealthStatusPacket packet) {
+    public void handleHealthStatus(PacketHealthStatus packet) {
         healthMonitor.addHealthStatus(packet);
     }
 
-    public void handleAgentInformation(AgentInformationPacket packet) {
+    public void handleAgentInformation(PacketAgentInformation packet) {
         information = packet;
         logger.info("Authenticating Agent (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
 
-        AuthResponsePacket response = new AuthResponsePacket();
-        if (!packet.getName().isEmpty() && packet.getPassword().equals(AgentInformationPacket.PASSWORD)) {
+        PacketAuthResponse response = new PacketAuthResponse();
+        if (!packet.getName().isEmpty() && packet.getPassword().equals(PacketAgentInformation.PASSWORD)) {
             // Authentication successful
             logger.info("Agent successfully authenticated! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.WORKING;
-            response.setCode(AuthResponsePacket.AuthResponseCode.SUCCESS);
+            response.setCode(PacketAuthResponse.AuthResponseCode.SUCCESS);
             response.setMessage("OK");
         } else {
             logger.info("cc Agent failed to authenticate! (" + channel.remoteAddress().toString() + " / " + packet.getName() + ")");
             state = AgentState.CLOSING;
-            response.setCode(AuthResponsePacket.AuthResponseCode.ERROR);
+            response.setCode(PacketAuthResponse.AuthResponseCode.ERROR);
             response.setMessage("ERROR");
         }
         sendPacket(response);

@@ -6,7 +6,7 @@ import de.slikey.batch.network.protocol.ConnectionHandler;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.network.protocol.Protocol;
-import de.slikey.batch.network.protocol.packet.*;
+import de.slikey.batch.protocol.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
@@ -66,32 +66,28 @@ public class BatchAgent extends NIOClient {
                     public PacketHandler newPacketHandler() {
                         return new PacketHandler() {
 
-                            @Override
-                            public void handle(PingPacket packet) {
+                            public void handle(PacketPing packet) {
                                 logger.debug(packet);
-                                socketChannel.writeAndFlush(PongPacket.create(packet));
+                                socketChannel.writeAndFlush(PacketPong.create(packet));
                             }
 
-                            @Override
-                            public void handle(PongPacket packet) {
+                            public void handle(PacketPong packet) {
                                 logger.debug(packet);
                             }
 
-                            @Override
                             public void handle(HandshakePacket packet) {
                                 logger.info("Received handshake..");
                                 if (packet.getVersion() == Protocol.getProtocolHash()) {
                                     logger.info("Versions match! Sending auth-information...");
-                                    socketChannel.writeAndFlush(new AgentInformationPacket("Worker_" + RANDOM.nextInt(Integer.MAX_VALUE), AgentInformationPacket.PASSWORD));
+                                    socketChannel.writeAndFlush(new PacketAgentInformation("Worker_" + RANDOM.nextInt(Integer.MAX_VALUE), PacketAgentInformation.PASSWORD));
                                 } else {
                                     logger.info("Versions mismatch! Shutting down!");
                                     System.exit(0);
                                 }
                             }
 
-                            @Override
-                            public void handle(AuthResponsePacket packet) {
-                                if (packet.getCode() == AuthResponsePacket.AuthResponseCode.SUCCESS) {
+                            public void handle(PacketAuthResponse packet) {
+                                if (packet.getCode() == PacketAuthResponse.AuthResponseCode.SUCCESS) {
                                     logger.info("Authentication successful!");
                                 } else {
                                     logger.info("Authentication unsuccessful! Shutting down...");
@@ -99,8 +95,7 @@ public class BatchAgent extends NIOClient {
                                 }
                             }
 
-                            @Override
-                            public void handle(final JobExecutePacket packet) {
+                            public void handle(final PacketJobExecute packet) {
                                 logger.info("Controller issued command to run job: " + packet);
                                 THREAD_POOL.execute(new Runnable() {
                                     @Override
@@ -109,7 +104,7 @@ public class BatchAgent extends NIOClient {
                                             Thread.sleep(RANDOM.nextInt(30 * 1000));
                                             int returnCode = 200;
                                             logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + returnCode);
-                                            socketChannel.writeAndFlush(new JobResponsePacket(packet.getUuid(), returnCode));
+                                            socketChannel.writeAndFlush(new PacketJobResponse(packet.getUuid(), returnCode));
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
@@ -137,7 +132,7 @@ public class BatchAgent extends NIOClient {
             public void run() {
                 try {
                     while (channel.isActive()) {
-                        channel.writeAndFlush(new KeepAlivePacket());
+                        channel.writeAndFlush(new PacketKeepAlive());
                         Thread.sleep(random.nextInt(4000));
                     }
                 } catch (InterruptedException e) {
@@ -150,7 +145,7 @@ public class BatchAgent extends NIOClient {
             public void run() {
                 try {
                     while (channel.isActive()) {
-                        channel.writeAndFlush(HealthStatusPacket.create());
+                        channel.writeAndFlush(PacketHealthStatus.create());
                         Thread.sleep(random.nextInt(1000));
                     }
                 } catch (InterruptedException e) {

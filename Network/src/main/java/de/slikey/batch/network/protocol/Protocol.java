@@ -1,5 +1,6 @@
 package de.slikey.batch.network.protocol;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.ClassPath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * @author Kevin Carstens
@@ -28,21 +28,36 @@ public class Protocol {
         initialize("de.slikey.batch.network.protocol.packet");
     }
 
+    public static int getSize() {
+        return packetIds.size();
+    }
+
+    public static ImmutableList<Class<? extends Packet>> getPackets() {
+        return ImmutableList.copyOf(packetIds);
+    }
+
     @SuppressWarnings("unchecked")
-    public static void initialize(String packagePath) throws IOException{
+    public static void initialize(String packagePath) throws IOException {
         logger.info("Initialize Protocol...");
         final ClassPath classPath = ClassPath.from(Thread.currentThread().getContextClassLoader());
-        Set<ClassPath.ClassInfo> classes = classPath.getTopLevelClasses(packagePath);
 
         String report = "Registered Packets to Protocol: \n{\n";
-        for (ClassPath.ClassInfo classInfo : classes) {
-            Class<?> clazz = classInfo.load();
-            if (clazz.getSuperclass() == Packet.class) {
-                int index = register((Class<? extends Packet>) clazz);
-                report += "\t{id=" + index + ", name='" + clazz.getName() + "'},\n";
+        for (ClassPath.ResourceInfo resourceInfo : classPath.getResources()) {
+            try {
+                String className = resourceInfo.toString();
+                if (className.contains(".Packet")) {
+                    Class<?> clazz = Class.forName(className);
+                    if (clazz.getSuperclass() == Packet.class) {
+                        int index = register((Class<? extends Packet>) clazz);
+                        report += "\t{id=" + index + ", name='" + clazz.getName() + "'},\n";
+                    }
+                }
+            } catch (Exception e) {
+                throw new IOException(e);
             }
         }
         report = report.substring(0, report.length() - 2) + "\n}";
+
 
         logger.debug(report + " (Hash: " + protocolHash + ")");
         initialized = true;
@@ -92,9 +107,12 @@ public class Protocol {
         }
 
         try {
-            Constructor<?> packet = packets[id];
-            if (packet != null)
-                return (Packet) packet.newInstance();
+            Constructor<?> constructor = packets[id];
+            if (constructor != null) {
+                Packet packet = (Packet) constructor.newInstance();
+                packet.setId(id);
+                return packet;
+            }
         } catch (IndexOutOfBoundsException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new BadPacketException(e);
         }

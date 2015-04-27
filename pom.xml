@@ -12,6 +12,7 @@
         <module>Network</module>
         <module>Agent</module>
         <module>Controller</module>
+        <module>Protocol</module>
     </modules>
 
     <dependencies>

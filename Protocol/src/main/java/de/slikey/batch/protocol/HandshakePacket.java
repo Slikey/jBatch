@@ -1,20 +1,20 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
 /**
- * @author Kevin
- * @since 24.03.2015
+ * @author Kevin Carstens
+ * @since 27.04.2015
  */
 public class HandshakePacket extends Packet {
 
     private int version;
 
     public HandshakePacket() {
+
     }
 
     public HandshakePacket(int version) {
@@ -35,20 +35,12 @@ public class HandshakePacket extends Packet {
     }
 
     @Override
-    public HandshakePacket read(ByteBuf buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         version = buf.readInt();
-        return this;
-    }
-
-    @Override
-    public void handle(PacketHandler packetHandler) {
-        packetHandler.handle(this);
     }
 
     @Override
     public String toString() {
-        return "HandshakePacket{"
-                + "version=" + version
-                + "}";
+        return null;
     }
 }

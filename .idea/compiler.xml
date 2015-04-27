@@ -26,6 +26,7 @@
         <module name="Agent" />
         <module name="Controller" />
         <module name="Network" />
+        <module name="Protocol" />
       </profile>
     </annotationProcessing>
   </component>

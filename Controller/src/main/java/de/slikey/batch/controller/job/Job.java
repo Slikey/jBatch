@@ -1,7 +1,7 @@
 package de.slikey.batch.controller.job;
 
 import de.slikey.batch.controller.agent.Agent;
-import de.slikey.batch.network.protocol.packet.JobExecutePacket;
+import de.slikey.batch.protocol.PacketJobExecute;
 
 import java.util.Random;
 import java.util.UUID;
@@ -59,8 +59,8 @@ public class Job {
         this.scheduleInformation = scheduleInformation;
     }
 
-    public JobExecutePacket getPacket() {
-        return new JobExecutePacket(uuid, command);
+    public PacketJobExecute getPacket() {
+        return new PacketJobExecute(uuid, command);
     }
 
     public JobResponseCallback getCallback() {

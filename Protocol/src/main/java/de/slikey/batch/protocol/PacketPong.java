@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -10,20 +9,20 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 14.04.2015
  */
-public class PongPacket extends Packet {
+public class PacketPong extends Packet {
 
-    public static PongPacket create(PingPacket pingPacket) {
-        return new PongPacket(pingPacket.getSentTime(), pingPacket.getReceivedTime(), pingPacket.getBytes());
+    public static PacketPong create(PacketPing packetPing) {
+        return new PacketPong(packetPing.getSentTime(), packetPing.getReceivedTime(), packetPing.getBytes());
     }
 
     private long sentTime;
     private long receivedTime;
     private byte[] bytes;
 
-    public PongPacket() {
+    public PacketPong() {
     }
 
-    public PongPacket(long sentTime, long receivedTime, byte[] bytes) {
+    public PacketPong(long sentTime, long receivedTime, byte[] bytes) {
         this.sentTime = sentTime;
         this.receivedTime = receivedTime;
         this.bytes = bytes;
@@ -61,20 +60,14 @@ public class PongPacket extends Packet {
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
         buf.writeLong(receivedTime);
-        writeByteArray(buf, bytes);
+        Packet.writeByteArray(buf, bytes);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
         receivedTime = buf.readLong();
-        bytes = readByteArray(buf);
-        return this;
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
+        bytes = Packet.readByteArray(buf);
     }
 
     @Override

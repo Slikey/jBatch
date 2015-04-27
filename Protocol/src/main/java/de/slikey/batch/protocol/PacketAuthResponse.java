@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -10,16 +9,16 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 20.04.2015
  */
-public class AuthResponsePacket extends Packet {
+public class PacketAuthResponse extends Packet {
 
     private AuthResponseCode code;
     private String message;
 
-    public AuthResponsePacket() {
+    public PacketAuthResponse() {
 
     }
 
-    public AuthResponsePacket(AuthResponseCode code, String message) {
+    public PacketAuthResponse(AuthResponseCode code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -43,14 +42,13 @@ public class AuthResponsePacket extends Packet {
     @Override
     public void write(ByteBuf buf) throws IOException {
         writeAuthResponseCode(buf, code);
-        writeString(buf, message);
+        Packet.writeString(buf, message);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         code = readAuthResponseCode(buf);
-        message = readString(buf);
-        return this;
+        message = Packet.readString(buf);
     }
 
     private void writeAuthResponseCode(ByteBuf buf, AuthResponseCode code) {
@@ -59,11 +57,6 @@ public class AuthResponsePacket extends Packet {
 
     private AuthResponseCode readAuthResponseCode(ByteBuf buf) {
         return AuthResponseCode.values()[buf.readByte()];
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
     }
 
     @Override

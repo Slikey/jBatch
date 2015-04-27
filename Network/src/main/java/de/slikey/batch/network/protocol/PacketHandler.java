@@ -1,9 +1,12 @@
 package de.slikey.batch.network.protocol;
 
 
-import de.slikey.batch.network.protocol.packet.*;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @author Kevin
@@ -11,49 +14,49 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public class PacketHandler extends ChannelHandlerAdapter {
 
+    private final MethodCache methodCache;
+
+    public PacketHandler() {
+        this.methodCache = new MethodCache(this);
+    }
+
     @Override
     public final void channelRead(ChannelHandlerContext channelHandlerContext, Object object) throws Exception {
-        ((Packet) object).handle(this);
+        Packet packet = (Packet) object;
+        methodCache.invoke(packet);
     }
 
-    private void error(Packet packet) {
-        throw new IllegalStateException("PacketHandler does not implement handler for " + packet.getClass().getSimpleName() + "!");
+    private class MethodCache {
+
+        private final Method[] methods;
+
+        private MethodCache(PacketHandler packetHandler) {
+            List<Class<? extends Packet>> packets = Protocol.getPackets();
+            this.methods = new Method[packets.size()];
+            Class<? extends PacketHandler> packetHandlerClass = packetHandler.getClass();
+            int index = 0;
+            for (Class<? extends Packet> packet : packets) {
+                try {
+                    Method method = packetHandlerClass.getDeclaredMethod("handle", packet);
+                    method.setAccessible(true);
+                    this.methods[index] = method;
+                } catch (NoSuchMethodException e) {
+                    // No Handler for Packet is defined.
+                    // Ignoring Exception because this is a common way to have specific handlers
+                }
+
+                index++;
+            }
+        }
+
+        public void invoke(Packet packet) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+            Method method = methods[packet.getId()];
+            if (method == null)
+                throw new NoSuchMethodException("No handler for packet found. Queried: " + packet.getClass().getName());
+
+            method.invoke(PacketHandler.this, packet);
+        }
+
     }
-
-    public void handle(HandshakePacket packet) {
-        error(packet);
-    }
-
-    public void handle(HealthStatusPacket packet) {
-        error(packet);
-    }
-
-    public void handle(PingPacket packet) {
-        error(packet);
-    }
-
-    public void handle(PongPacket packet) {
-        error(packet);
-    }
-
-    public void handle(KeepAlivePacket packet) {
-        error(packet);
-    }
-
-    public void handle(AuthResponsePacket packet) {
-        error(packet);
-    }
-
-    public void handle(AgentInformationPacket packet) {
-        error(packet);
-    }
-
-    public void handle(JobExecutePacket packet) { error(packet);}
-
-    public void handle(JobResponsePacket packet) {
-        error(packet);
-    }
-
-    public void handle(ExceptionPacket packet) { error(packet); }
 
 }

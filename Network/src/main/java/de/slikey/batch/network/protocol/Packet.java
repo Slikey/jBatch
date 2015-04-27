@@ -21,9 +21,19 @@ public abstract class Packet {
     public static final Charset charset = Charset.forName("UTF-8");
     public static final int LIMIT_STRING_LIST_SIZE = Short.MAX_VALUE;
 
+    protected int id;
+
     public abstract void write(ByteBuf buf) throws IOException;
 
-    public abstract Packet read(ByteBuf buf) throws IOException;
+    public abstract void read(ByteBuf buf) throws IOException;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     @Override
     public abstract String toString();
@@ -171,7 +181,5 @@ public abstract class Packet {
                 break;
         }
     }
-
-    public abstract void handle(PacketHandler packetListener);
 
 }

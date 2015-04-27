@@ -1,7 +1,7 @@
 package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.PacketHandler;
-import de.slikey.batch.network.protocol.packet.*;
+import de.slikey.batch.protocol.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,38 +22,32 @@ public class ControllerPacketHandler extends PacketHandler {
         return connectionHandler;
     }
 
-    @Override
-    public void handle(HealthStatusPacket packet) {
+    public void handle(PacketHealthStatus packet) {
         connectionHandler.getAgent().handleHealthStatus(packet);
     }
 
-    @Override
-    public void handle(PingPacket packet) {
+    public void handle(PacketPing packet) {
         logger.debug(packet);
-        connectionHandler.getAgent().sendPacket(PongPacket.create(packet));
+        connectionHandler.getAgent().sendPacket(PacketPong.create(packet));
     }
 
-    @Override
-    public void handle(PongPacket packet) {
+    public void handle(PacketPong packet) {
         logger.debug(packet);
     }
 
-    @Override
-    public void handle(ExceptionPacket packet) {
+    public void handle(PacketException packet) {
         logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getInformation().getName() + ")", packet.getException());
     }
 
-    @Override
-    public void handle(KeepAlivePacket packet) {
+    public void handle(PacketKeepAlive packet) {
     }
 
-    @Override
-    public void handle(AgentInformationPacket packet) {
+    public void handle(PacketAgentInformation packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
     }
 
-    @Override
-    public void handle(JobResponsePacket packet) {
+    public void handle(PacketJobResponse packet) {
         connectionHandler.getInitializer().getBatchController().getJobManager().handleJobResponse(packet);
     }
+
 }

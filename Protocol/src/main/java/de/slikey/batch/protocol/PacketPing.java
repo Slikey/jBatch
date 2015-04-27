@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -11,23 +10,23 @@ import java.security.SecureRandom;
  * @author Kevin Carstens
  * @since 14.04.2015
  */
-public class PingPacket extends Packet {
+public class PacketPing extends Packet {
 
-    public static PingPacket create() {
+    public static PacketPing create() {
         byte[] bytes = new byte[Short.MAX_VALUE];
         SecureRandom random = new SecureRandom();
         random.nextBytes(bytes);
-        return new PingPacket(System.nanoTime(), bytes);
+        return new PacketPing(System.nanoTime(), bytes);
     }
 
     private long receivedTime;
     private long sentTime;
     private byte[] bytes;
 
-    public PingPacket() {
+    public PacketPing() {
     }
 
-    public PingPacket(long sentTime, byte[] bytes) {
+    public PacketPing(long sentTime, byte[] bytes) {
         this.sentTime = sentTime;
         this.bytes = bytes;
     }
@@ -59,20 +58,14 @@ public class PingPacket extends Packet {
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
-        writeByteArray(buf, bytes);
+        Packet.writeByteArray(buf, bytes);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
-        bytes = readByteArray(buf);
+        bytes = Packet.readByteArray(buf);
         receivedTime = System.nanoTime();
-        return this;
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
     }
 
     @Override

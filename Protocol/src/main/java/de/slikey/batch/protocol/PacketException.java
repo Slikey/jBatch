@@ -1,7 +1,6 @@
-package de.slikey.batch.network.protocol.packet;
+package de.slikey.batch.protocol;
 
 import de.slikey.batch.network.protocol.Packet;
-import de.slikey.batch.network.protocol.PacketHandler;
 import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
@@ -10,16 +9,16 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 24.04.2015
  */
-public class ExceptionPacket extends Packet{
+public class PacketException extends Packet {
 
     private String name;
     private Exception exception;
 
-    public ExceptionPacket() {
+    public PacketException() {
 
     }
 
-    public ExceptionPacket(Exception exception) {
+    public PacketException(Exception exception) {
         this.name = exception.getClass().getName();
         this.exception = exception;
     }
@@ -42,28 +41,27 @@ public class ExceptionPacket extends Packet{
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        writeString(buf, name);
+        Packet.writeString(buf, name);
         writeException(buf, exception);
     }
 
     @Override
-    public Packet read(ByteBuf buf) throws IOException {
-        name = readString(buf);
+    public void read(ByteBuf buf) throws IOException {
+        name = Packet.readString(buf);
         exception = readException(buf);
-        return this;
     }
 
     private void writeException(ByteBuf buf, Exception exception) throws IOException {
-        writeString(buf, exception.getMessage());
+        Packet.writeString(buf, exception.getMessage());
         StackTraceElement[] elements = exception.getStackTrace();
-        writeVarInt(buf, elements.length);
+        Packet.writeVarInt(buf, elements.length);
         for (StackTraceElement element : elements)
             writeStackTraceElement(buf, element);
     }
 
     private Exception readException(ByteBuf buf) throws IOException {
-        String message = readString(buf);
-        int length = readVarInt(buf);
+        String message = Packet.readString(buf);
+        int length = Packet.readVarInt(buf);
         StackTraceElement[] elements = new StackTraceElement[length];
         for (int i = 0; i < length; i++) {
             elements[i] = readStackTraceElement(buf);
@@ -75,23 +73,18 @@ public class ExceptionPacket extends Packet{
     }
 
     private void writeStackTraceElement(ByteBuf buf, StackTraceElement stackTraceElement) throws IOException {
-        writeString(buf, stackTraceElement.getClassName());
-        writeString(buf, stackTraceElement.getMethodName());
-        writeString(buf, stackTraceElement.getFileName());
+        Packet.writeString(buf, stackTraceElement.getClassName());
+        Packet.writeString(buf, stackTraceElement.getMethodName());
+        Packet.writeString(buf, stackTraceElement.getFileName());
         buf.writeInt(stackTraceElement.getLineNumber());
     }
 
     private StackTraceElement readStackTraceElement(ByteBuf buf) throws IOException {
-        String declaringClass = readString(buf);
-        String methodName = readString(buf);
-        String fileName = readString(buf);
+        String declaringClass = Packet.readString(buf);
+        String methodName = Packet.readString(buf);
+        String fileName = Packet.readString(buf);
         int lineNumber = buf.readInt();
         return new StackTraceElement(declaringClass, methodName, fileName, lineNumber);
-    }
-
-    @Override
-    public void handle(PacketHandler packetListener) {
-        packetListener.handle(this);
     }
 
     @Override

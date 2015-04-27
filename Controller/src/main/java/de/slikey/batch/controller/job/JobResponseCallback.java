@@ -1,6 +1,6 @@
 package de.slikey.batch.controller.job;
 
-import de.slikey.batch.network.protocol.packet.JobResponsePacket;
+import de.slikey.batch.protocol.PacketJobResponse;
 
 /**
  * @author Kevin Carstens
@@ -8,6 +8,6 @@ import de.slikey.batch.network.protocol.packet.JobResponsePacket;
  */
 public interface JobResponseCallback {
 
-    public void response(JobResponsePacket response);
+    public void response(PacketJobResponse response);
 
 }
