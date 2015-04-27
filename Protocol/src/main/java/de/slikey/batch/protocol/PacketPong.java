@@ -60,19 +60,19 @@ public class PacketPong extends Packet {
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
         buf.writeLong(receivedTime);
-        Packet.writeByteArray(buf, bytes);
+        writeByteArray(buf, bytes);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
         receivedTime = buf.readLong();
-        bytes = Packet.readByteArray(buf);
+        bytes = readByteArray(buf);
     }
 
     @Override
     public String toString() {
-        return "PongPacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "sentTime=" + sentTime +
                 ", receiveTime=" + receivedTime +
                 ", bytes=" + bytes.length +

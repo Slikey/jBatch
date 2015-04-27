@@ -59,7 +59,9 @@ public class PacketClientHello extends Packet {
 
     @Override
     public String toString() {
-        return null;
+        return this.getClass().getSimpleName() + "{" +
+                "timestamp=" + timestamp +
+                ", random=" + random +
+                '}';
     }
-
 }

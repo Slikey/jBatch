@@ -42,19 +42,19 @@ public class PacketJobResponse extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        Packet.writeUUID(buf, uuid);
+        writeUUID(buf, uuid);
         buf.writeInt(returnCode);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
-        uuid = Packet.readUUID(buf);
+        uuid = readUUID(buf);
         returnCode = buf.readInt();
     }
 
     @Override
     public String toString() {
-        return "JobResponsePacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "uuid=" + uuid +
                 ", returnCode=" + returnCode +
                 '}';

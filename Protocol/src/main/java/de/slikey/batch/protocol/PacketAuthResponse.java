@@ -42,13 +42,13 @@ public class PacketAuthResponse extends Packet {
     @Override
     public void write(ByteBuf buf) throws IOException {
         writeAuthResponseCode(buf, code);
-        Packet.writeString(buf, message);
+        writeString(buf, message);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
         code = readAuthResponseCode(buf);
-        message = Packet.readString(buf);
+        message = readString(buf);
     }
 
     private void writeAuthResponseCode(ByteBuf buf, AuthResponseCode code) {
@@ -61,7 +61,7 @@ public class PacketAuthResponse extends Packet {
 
     @Override
     public String toString() {
-        return "AuthResponsePacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "code=" + code +
                 ", message='" + message + '\'' +
                 '}';

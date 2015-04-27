@@ -318,8 +318,8 @@ public class PacketHealthStatus extends Packet {
         buf.writeLong(totalSwapSpaceSize);
 
         // Information on Runtime
-        Packet.writeString(buf, name);
-        Packet.writeString(buf, vmVersion);
+        writeString(buf, name);
+        writeString(buf, vmVersion);
         buf.writeLong(uptime);
         buf.writeLong(startTime);
 
@@ -353,8 +353,8 @@ public class PacketHealthStatus extends Packet {
         totalPhysicalMemorySize = buf.readLong();
         totalSwapSpaceSize = buf.readLong();
 
-        name = Packet.readString(buf);
-        vmVersion = Packet.readString(buf);
+        name = readString(buf);
+        vmVersion = readString(buf);
         uptime = buf.readLong();
         startTime = buf.readLong();
 
@@ -391,7 +391,7 @@ public class PacketHealthStatus extends Packet {
 
     @Override
     public String toString() {
-        return "HealthStatusPacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "committedVirtualMemorySize=" + committedVirtualMemorySize +
                 ", freePhysicalMemorySize=" + freePhysicalMemorySize +
                 ", freeSwapSpaceSize=" + freeSwapSpaceSize +

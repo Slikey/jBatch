@@ -49,16 +49,21 @@ public class PacketServerHello extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-
+        buf.writeLong(timestamp);
+        buf.writeLong(random);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
-
+        timestamp = buf.readLong();
+        random = buf.readLong();
     }
 
     @Override
     public String toString() {
-        return null;
+        return this.getClass().getSimpleName() + "{" +
+                "timestamp=" + timestamp +
+                ", random=" + random +
+                '}';
     }
 }

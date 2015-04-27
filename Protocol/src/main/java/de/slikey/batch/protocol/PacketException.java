@@ -41,27 +41,27 @@ public class PacketException extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        Packet.writeString(buf, name);
+        writeString(buf, name);
         writeException(buf, exception);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
-        name = Packet.readString(buf);
+        name = readString(buf);
         exception = readException(buf);
     }
 
     private void writeException(ByteBuf buf, Exception exception) throws IOException {
-        Packet.writeString(buf, exception.getMessage());
+        writeString(buf, exception.getMessage());
         StackTraceElement[] elements = exception.getStackTrace();
-        Packet.writeVarInt(buf, elements.length);
+        writeVarInt(buf, elements.length);
         for (StackTraceElement element : elements)
             writeStackTraceElement(buf, element);
     }
 
     private Exception readException(ByteBuf buf) throws IOException {
-        String message = Packet.readString(buf);
-        int length = Packet.readVarInt(buf);
+        String message = readString(buf);
+        int length = readVarInt(buf);
         StackTraceElement[] elements = new StackTraceElement[length];
         for (int i = 0; i < length; i++) {
             elements[i] = readStackTraceElement(buf);
@@ -73,23 +73,23 @@ public class PacketException extends Packet {
     }
 
     private void writeStackTraceElement(ByteBuf buf, StackTraceElement stackTraceElement) throws IOException {
-        Packet.writeString(buf, stackTraceElement.getClassName());
-        Packet.writeString(buf, stackTraceElement.getMethodName());
-        Packet.writeString(buf, stackTraceElement.getFileName());
+        writeString(buf, stackTraceElement.getClassName());
+        writeString(buf, stackTraceElement.getMethodName());
+        writeString(buf, stackTraceElement.getFileName());
         buf.writeInt(stackTraceElement.getLineNumber());
     }
 
     private StackTraceElement readStackTraceElement(ByteBuf buf) throws IOException {
-        String declaringClass = Packet.readString(buf);
-        String methodName = Packet.readString(buf);
-        String fileName = Packet.readString(buf);
+        String declaringClass = readString(buf);
+        String methodName = readString(buf);
+        String fileName = readString(buf);
         int lineNumber = buf.readInt();
         return new StackTraceElement(declaringClass, methodName, fileName, lineNumber);
     }
 
     @Override
     public String toString() {
-        return "ExceptionPacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "name='" + name + '\'' +
                 ", exception=" + exception +
                 '}';

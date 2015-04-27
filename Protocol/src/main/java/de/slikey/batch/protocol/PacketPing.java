@@ -58,19 +58,19 @@ public class PacketPing extends Packet {
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
-        Packet.writeByteArray(buf, bytes);
+        writeByteArray(buf, bytes);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
-        bytes = Packet.readByteArray(buf);
+        bytes = readByteArray(buf);
         receivedTime = System.nanoTime();
     }
 
     @Override
     public String toString() {
-        return "PingPacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "sentTime=" + sentTime +
                 ", receivedTime=" + receivedTime +
                 ", bytes=" + bytes.length +

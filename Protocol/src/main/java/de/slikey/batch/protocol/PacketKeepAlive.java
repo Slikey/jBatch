@@ -26,7 +26,7 @@ public class PacketKeepAlive extends Packet {
 
     @Override
     public String toString() {
-        return "KeepAlivePacket{}";
+        return this.getClass().getSimpleName() + "{}";
     }
 
 }

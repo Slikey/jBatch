@@ -43,19 +43,19 @@ public class PacketAgentInformation extends Packet {
 
     @Override
     public void write(ByteBuf buf) throws IOException {
-        Packet.writeString(buf, name);
-        Packet.writeString(buf, password);
+        writeString(buf, name);
+        writeString(buf, password);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
-        name = Packet.readString(buf);
-        password = Packet.readString(buf);
+        name = readString(buf);
+        password = readString(buf);
     }
 
     @Override
     public String toString() {
-        return "AgentInformationPacket{" +
+        return this.getClass().getSimpleName() + "{" +
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 '}';

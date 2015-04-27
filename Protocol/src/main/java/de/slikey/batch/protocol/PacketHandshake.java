@@ -41,6 +41,8 @@ public class PacketHandshake extends Packet {
 
     @Override
     public String toString() {
-        return null;
+        return this.getClass().getSimpleName() + "{" +
+                "version=" + version +
+                '}';
     }
 }
