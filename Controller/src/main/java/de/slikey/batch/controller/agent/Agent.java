@@ -1,5 +1,6 @@
 package de.slikey.batch.controller.agent;
 
+import de.slikey.batch.controller.job.Job;
 import de.slikey.batch.controller.monitoring.HealthMonitor;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.Protocol;
@@ -11,6 +12,9 @@ import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Kevin Carstens
  * @since 19.04.2015
@@ -21,6 +25,7 @@ public class Agent {
 
     private final Channel channel;
     private final HealthMonitor healthMonitor;
+    private final List<Job> jobs;
 
     private AgentManager agentManager;
     private AgentState state;
@@ -29,6 +34,7 @@ public class Agent {
     public Agent(Channel channel) {
         this.channel = channel;
         this.healthMonitor = new HealthMonitor();
+        this.jobs = new ArrayList<>();
 
         this.state = AgentState.CONNECTING;
     }

@@ -58,28 +58,9 @@ public class BatchController extends NIOServer {
 
     @Override
     public void startApplication() {
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        try {
-                            agentManager.tick();
-                        } catch (Exception e) {
-                            logger.error("Exception occurred in AgentManager tick.", e);
-                        }
-                        try {
-                            jobManager.tick();
-                        } catch (Exception e) {
-                            logger.error("Exception occurred in JobManager tick.", e);
-                        }
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+        agentManager.start(THREAD_POOL);
+        jobManager.start(THREAD_POOL);
+
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {

@@ -1,5 +1,6 @@
 package de.slikey.batch.controller.job;
 
+import de.slikey.batch.controller.agent.Agent;
 import de.slikey.batch.network.protocol.packet.JobExecutePacket;
 
 import java.util.Random;
@@ -17,6 +18,7 @@ public class Job {
     private final JobResponseCallback callback;
     private JobState jobState;
     private JobScheduleInformation scheduleInformation;
+    private Agent agent;
 
     public Job(String command, JobResponseCallback callback) {
         this.uuid = new UUID(System.nanoTime(), random.nextLong());
@@ -35,6 +37,14 @@ public class Job {
 
     public JobState getJobState() {
         return jobState;
+    }
+
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     public void setJobState(JobState jobState) {

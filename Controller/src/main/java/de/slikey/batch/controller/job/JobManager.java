@@ -2,6 +2,7 @@ package de.slikey.batch.controller.job;
 
 import de.slikey.batch.controller.BatchController;
 import de.slikey.batch.controller.agent.Agent;
+import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.packet.JobResponsePacket;
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Kevin Carstens
  * @since 24.04.2015
  */
-public class JobManager {
+public class JobManager extends TickingManager{
 
     private static final Logger logger = LogManager.getLogger(JobManager.class.getSimpleName());
 
@@ -23,6 +24,7 @@ public class JobManager {
     private final List<Job> jobs;
 
     public JobManager(BatchController batchController) {
+        super(1000);
         this.batchController = batchController;
         this.jobs = new CopyOnWriteArrayList<>();
     }
@@ -74,12 +76,34 @@ public class JobManager {
         } else {
             logger.info("Received JobResponse for JobID (" + uuid.toString() + "). Calling callback...");
             job.getCallback().response(packet);
+            jobs.remove(job);
         }
     }
 
-    public void tick() {
-        if (jobs.size() > 0 && batchController.getAgentManager().getAgents().size() == 0) {
-            logger.warn("No active Agent found. There are " + jobs.size() + " job(s) pending to be executed!");
+    public void onAgentRemove(Agent agent) {
+        for (Job job : jobs) {
+            if (job.getJobState() == JobState.EXECUTING && job.getAgent() == agent) {
+                logger.error("Agent (" + agent.getInformation().getName() + ") disconnected while working on Job (" + job.toString() + ")!");
+                handleJobResponse(new JobResponsePacket(job.getUuid(), -1));
+            }
+        }
+    }
+
+    public int getJobs(JobState jobState) {
+        int i = 0;
+        for (Job job : jobs) {
+            if (job.getJobState() == jobState) {
+                i++;
+            }
+        }
+        return i;
+    }
+
+    @Override
+    protected void onTick(double deltaSeconds) {
+        int pendingJobs = getJobs(JobState.SCHEDULED);
+        if (pendingJobs > 0 && batchController.getAgentManager().getAgents().size() == 0) {
+            logger.warn("No active Agent found. There are " + pendingJobs + " job(s) pending to be executed!");
             return;
         }
         for (Job job : jobs) {
@@ -97,4 +121,5 @@ public class JobManager {
             }
         }
     }
+
 }

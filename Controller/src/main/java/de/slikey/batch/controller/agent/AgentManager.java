@@ -1,23 +1,28 @@
 package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.controller.BatchController;
+import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.Packet;
 import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Kevin Carstens
  * @since 19.04.2015
  */
-public class AgentManager {
+public class AgentManager extends TickingManager {
 
     private final BatchController batchController;
     private final Map<SocketAddress, Agent> agents;
     private final AgentHealthBalancer healthBalancer;
 
     public AgentManager(BatchController batchController) {
+        super(1000);
         this.batchController = batchController;
         this.agents = new HashMap<>();
         this.healthBalancer = new AgentHealthBalancer(this);
@@ -32,7 +37,9 @@ public class AgentManager {
     }
 
     public void removeAgent(Channel channel) {
-        agents.remove(channel.remoteAddress());
+        Agent agent = agents.remove(channel.remoteAddress());
+        if (agent != null)
+            batchController.getJobManager().onAgentRemove(agent);
     }
 
     public BatchController getBatchController() {
@@ -53,7 +60,8 @@ public class AgentManager {
         }
     }
 
-    public void tick() {
+    @Override
+    protected void onTick(double deltaSeconds) {
 
     }
 }
