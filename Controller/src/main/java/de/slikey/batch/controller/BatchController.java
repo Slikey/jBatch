@@ -68,7 +68,11 @@ public class BatchController extends NIOServer {
                         Job job = new Job(command, new JobResponseCallback() {
                             @Override
                             public void response(PacketJobResponse response) {
-                                logger.info("Job successfully executed! '" + command + "'");
+                                if (response.getReturnCode() == 0) {
+                                    logger.info("Job successfully executed! '" + command + "'");
+                                } else {
+                                    logger.info("Job failed to execute! '" + command + "'");
+                                }
                             }
                         });
                         job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 1000L));

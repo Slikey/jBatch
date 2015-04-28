@@ -2,6 +2,7 @@ package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.protocol.*;
+import de.slikey.batch.protocol.job.PacketJobConsoleOutput;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,6 +46,10 @@ public class ControllerPacketHandler extends PacketHandler {
 
     public void handle(PacketJobResponse packet) {
         connectionHandler.getInitializer().getBatchController().getJobManager().handleJobResponse(packet);
+    }
+
+    public void handle(PacketJobConsoleOutput packet) {
+        System.out.println("[" + packet.getLevel() + "]: " + packet.getLine());
     }
 
 }

@@ -114,7 +114,7 @@ public class BatchAgent extends NIOClient {
                                 THREAD_POOL.execute(new Runnable() {
                                     @Override
                                     public void run() {
-                                        JobExecutor jobExecutor = new JobExecutor(packet.getCommand());
+                                        JobExecutor jobExecutor = new JobExecutor(BatchAgent.this, packet.getUuid(), packet.getCommand());
                                         jobExecutor.run();
                                         logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + jobExecutor.getExitCode());
                                         socketChannel.writeAndFlush(new PacketJobResponse(packet.getUuid(), jobExecutor.getExitCode()));

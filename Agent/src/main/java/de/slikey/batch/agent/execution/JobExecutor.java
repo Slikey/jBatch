@@ -1,12 +1,13 @@
 package de.slikey.batch.agent.execution;
 
+import de.slikey.batch.agent.BatchAgent;
+import de.slikey.batch.protocol.job.PacketJobConsoleOutput;
+import io.netty.util.internal.PlatformDependent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.util.UUID;
 
 /**
  * @author Kevin
@@ -16,12 +17,17 @@ public class JobExecutor implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(JobExecutor.class.getSimpleName());
 
+    private final BatchAgent batchAgent;
+    private final UUID uuid;
     private final String command;
     private int exitCode;
 
-    public JobExecutor(String command) {
-        //if (PlatformDependent.isWindows())
-        //    command = command;
+    public JobExecutor(BatchAgent batchAgent, UUID uuid, String command) {
+        this.batchAgent = batchAgent;
+        this.uuid = uuid;
+
+        if (PlatformDependent.isWindows())
+            command = "cmd /c " + command;
         this.command = command;
     }
 
@@ -31,10 +37,6 @@ public class JobExecutor implements Runnable {
 
     public int getExitCode() {
         return exitCode;
-    }
-
-    public void setExitCode(int exitCode) {
-        this.exitCode = exitCode;
     }
 
     protected void onStart() {
@@ -50,18 +52,19 @@ public class JobExecutor implements Runnable {
         try {
             onStart();
 
-            String line;
             Process process = Runtime.getRuntime().exec(command);
-            Reader r = new InputStreamReader(process.getErrorStream());
-            BufferedReader in = new BufferedReader(r);
-            while ((line = in.readLine()) != null) {
-                System.err.println(line);
+
+            ConsoleReader console = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.OUTPUT, process.getInputStream()).start(BatchAgent.THREAD_POOL);
+            ConsoleReader error = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.ERROR, process.getErrorStream()).start(BatchAgent.THREAD_POOL);
+
+            try {
+                exitCode = process.waitFor();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            in.close();
-            exitCode = process.exitValue();
 
             onStop();
-        } catch (IOException e) {
+        } catch (IOException  e) {
             e.printStackTrace();
         }
     }
