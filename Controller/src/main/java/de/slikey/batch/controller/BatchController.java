@@ -57,22 +57,23 @@ public class BatchController extends NIOServer {
         agentManager.start(THREAD_POOL);
         jobManager.start(THREAD_POOL);
         healthManager.start(THREAD_POOL);
+
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     Random random = new Random();
                     while (true) {
-                        Thread.sleep(random.nextInt(25000));
-                        final String command = "sh ua_" + (random.nextInt(8999) + 1000) + ".sh -range 0-" + random.nextInt(423);
+                        final String command = "java -version";
                         Job job = new Job(command, new JobResponseCallback() {
                             @Override
                             public void response(PacketJobResponse response) {
                                 logger.info("Job successfully executed! '" + command + "'");
                             }
                         });
-                        job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 10 * 1000L));
+                        job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 1000L));
                         jobManager.schedule(job);
+                        Thread.sleep(random.nextInt(45 * 1000));
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

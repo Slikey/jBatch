@@ -1,6 +1,7 @@
 package de.slikey.batch.agent;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import de.slikey.batch.agent.execution.JobExecutor;
 import de.slikey.batch.network.client.NIOClient;
 import de.slikey.batch.network.protocol.ConnectionHandler;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
@@ -38,8 +39,21 @@ public class BatchAgent extends NIOClient {
         new BatchAgent("localhost", 8080).run();
     }
 
+    private final HealthManager healthManager;
+    private final KeepAliveManager keepAliveManager;
+
     public BatchAgent(String host, int port) {
         super(host, port);
+        this.healthManager = new HealthManager(this);
+        this.keepAliveManager = new KeepAliveManager(this);
+    }
+
+    public HealthManager getHealthManager() {
+        return healthManager;
+    }
+
+    public KeepAliveManager getKeepAliveManager() {
+        return keepAliveManager;
     }
 
     @Override
@@ -100,14 +114,10 @@ public class BatchAgent extends NIOClient {
                                 THREAD_POOL.execute(new Runnable() {
                                     @Override
                                     public void run() {
-                                        try {
-                                            Thread.sleep(RANDOM.nextInt(30 * 1000));
-                                            int returnCode = 200;
-                                            logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + returnCode);
-                                            socketChannel.writeAndFlush(new PacketJobResponse(packet.getUuid(), returnCode));
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
+                                        JobExecutor jobExecutor = new JobExecutor(packet.getCommand());
+                                        jobExecutor.run();
+                                        logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + jobExecutor.getExitCode());
+                                        socketChannel.writeAndFlush(new PacketJobResponse(packet.getUuid(), jobExecutor.getExitCode()));
                                     }
                                 });
                             }
@@ -126,33 +136,10 @@ public class BatchAgent extends NIOClient {
     @Override
     protected void startClient() throws InterruptedException {
         final Channel channel = getChannel();
-        final Random random = new Random(System.nanoTime());
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (channel.isActive()) {
-                        channel.writeAndFlush(new PacketKeepAlive());
-                        Thread.sleep(random.nextInt(4000));
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (channel.isActive()) {
-                        channel.writeAndFlush(PacketHealthStatus.create());
-                        Thread.sleep(random.nextInt(1000));
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+
+        healthManager.start(THREAD_POOL);
+        keepAliveManager.start(THREAD_POOL);
+
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
@@ -174,19 +161,7 @@ public class BatchAgent extends NIOClient {
                 }
             }
         });
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (channel.isActive()) {
-                        //channel.writeAndFlush(PingPacket.create());
-                        Thread.sleep(random.nextInt(30000));
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+
         synchronized (this) {
             wait();
         }

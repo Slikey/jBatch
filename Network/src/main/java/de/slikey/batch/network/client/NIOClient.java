@@ -1,6 +1,7 @@
 package de.slikey.batch.network.client;
 
 import de.slikey.batch.network.client.listener.StartClientListener;
+import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.Protocol;
 import io.netty.bootstrap.Bootstrap;
@@ -77,6 +78,10 @@ public abstract class NIOClient {
         } else {
             System.out.println("There is no EventLoopGroup!");
         }
+    }
+
+    public void sendPacket(Packet packet) {
+        channel.writeAndFlush(packet);
     }
 
     public boolean isRunning() {

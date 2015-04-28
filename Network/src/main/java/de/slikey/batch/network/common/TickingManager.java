@@ -13,6 +13,7 @@ public abstract class TickingManager implements Runnable {
 
     private static Logger logger = LogManager.getLogger(TickingManager.class.getSimpleName());
 
+    private Thread currentThread;
     private long interval;
     private long lastExecution;
 
@@ -21,22 +22,35 @@ public abstract class TickingManager implements Runnable {
     }
 
     public void start(ExecutorService executorService) {
+        stop();
+
         String name = this.getClass().getSimpleName();
         LogManager.getLogger(name).info("Started " + name + "!");
         executorService.execute(this);
     }
 
+    public void stop() {
+        if (currentThread != null) {
+            currentThread.interrupt();
+        }
+    }
+
     @Override
     public final void run() {
+        String name = this.getClass().getSimpleName();
+        Logger childLogger =  LogManager.getLogger(name);
+
+        currentThread = Thread.currentThread();
         try {
             while (!Thread.interrupted()) {
                 long currentTime = System.currentTimeMillis();
                 long delta = currentTime - lastExecution;
                 double deltaSeconds = delta / 1000d;
+
                 try {
                     onTick(deltaSeconds);
                 } catch (Exception | ExceptionInInitializerError e) {
-                    logger.error("Exception occurred during tick.", e);
+                    childLogger.error("Exception occurred during tick.", e);
                 }
 
                 lastExecution = System.currentTimeMillis();
@@ -46,12 +60,15 @@ public abstract class TickingManager implements Runnable {
                 if (sleep > 0) {
                     Thread.sleep(sleep);
                 } else {
-                    logger.warn("Tick took " + timeTaken + "ms! Goal was " + interval + "! (" + this.getClass().getName() + ")");
+                    childLogger.warn("Tick took " + timeTaken + "ms! Goal was " + interval + "! (" + this.getClass().getName() + ")");
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            // Interrupted running Thread
         }
+        currentThread = null;
+
+        childLogger.info("Stopped " + name + "!");
     }
 
     protected abstract void onTick(double deltaSeconds);

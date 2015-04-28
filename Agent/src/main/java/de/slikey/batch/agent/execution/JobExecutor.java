@@ -1,6 +1,5 @@
 package de.slikey.batch.agent.execution;
 
-import io.netty.util.internal.PlatformDependent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,8 +20,8 @@ public class JobExecutor implements Runnable {
     private int exitCode;
 
     public JobExecutor(String command) {
-        if (PlatformDependent.isWindows())
-            command = "cmd /c " + command;
+        //if (PlatformDependent.isWindows())
+        //    command = command;
         this.command = command;
     }
 
@@ -53,10 +52,10 @@ public class JobExecutor implements Runnable {
 
             String line;
             Process process = Runtime.getRuntime().exec(command);
-            Reader r = new InputStreamReader(process.getInputStream());
+            Reader r = new InputStreamReader(process.getErrorStream());
             BufferedReader in = new BufferedReader(r);
             while ((line = in.readLine()) != null) {
-                System.out.println(line);
+                System.err.println(line);
             }
             in.close();
             exitCode = process.exitValue();
