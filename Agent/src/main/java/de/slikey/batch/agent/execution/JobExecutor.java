@@ -54,14 +54,17 @@ public class JobExecutor implements Runnable {
 
             Process process = Runtime.getRuntime().exec(command);
 
-            ConsoleReader console = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.OUTPUT, process.getInputStream()).start(BatchAgent.THREAD_POOL);
-            ConsoleReader error = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.ERROR, process.getErrorStream()).start(BatchAgent.THREAD_POOL);
+            ConsoleReader console = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.OUTPUT, process.getInputStream()).start(batchAgent.getThreadPool());
+            ConsoleReader error = new ConsoleReader(batchAgent, uuid, PacketJobConsoleOutput.Level.ERROR, process.getErrorStream()).start(batchAgent.getThreadPool());
 
             try {
                 exitCode = process.waitFor();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+            console.stop();
+            error.stop();
 
             onStop();
         } catch (IOException  e) {

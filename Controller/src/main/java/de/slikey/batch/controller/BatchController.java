@@ -24,24 +24,31 @@ import java.util.concurrent.Executors;
 public class BatchController extends NIOServer {
 
     private static final Logger logger = LogManager.getLogger(BatchController.class.getSimpleName());
-    public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-            .setDaemon(true)
-            .setNameFormat("BatchController-%s")
-            .build());
 
     public static void main(String[] args) {
         new BatchController(8080).run();
     }
 
+    private final ExecutorService threadPool;
     private final AgentManager agentManager;
     private final JobManager jobManager;
     private final HealthManager healthManager;
 
     public BatchController(int port) {
         super(port);
+        this.threadPool = Executors.newCachedThreadPool(
+                new ThreadFactoryBuilder()
+                        .setDaemon(true)
+                        .setNameFormat("BatchController-%s")
+                        .build()
+        );
         this.agentManager = new AgentManager(this);
         this.jobManager = new JobManager(this);
         this.healthManager = new HealthManager(this);
+    }
+
+    public ExecutorService getThreadPool() {
+        return threadPool;
     }
 
     public AgentManager getAgentManager() {
@@ -52,13 +59,17 @@ public class BatchController extends NIOServer {
         return jobManager;
     }
 
+    public HealthManager getHealthManager() {
+        return healthManager;
+    }
+
     @Override
     public void startApplication() {
-        agentManager.start(THREAD_POOL);
-        jobManager.start(THREAD_POOL);
-        healthManager.start(THREAD_POOL);
+        agentManager.start(threadPool);
+        jobManager.start(threadPool);
+        healthManager.start(threadPool);
 
-        THREAD_POOL.execute(new Runnable() {
+        threadPool.execute(new Runnable() {
             @Override
             public void run() {
                 try {

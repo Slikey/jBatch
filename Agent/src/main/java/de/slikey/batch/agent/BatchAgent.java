@@ -30,22 +30,30 @@ public class BatchAgent extends NIOClient {
 
     private static final Logger logger = LogManager.getLogger(BatchAgent.class.getSimpleName());
     public static final Random RANDOM = new Random();
-    public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-            .setDaemon(true)
-            .setNameFormat("BatchAgent-%s")
-            .build());
+
 
     public static void main(String[] args) throws InterruptedException {
         new BatchAgent("localhost", 8080).run();
     }
 
+    private final ExecutorService threadPool;
     private final HealthManager healthManager;
     private final KeepAliveManager keepAliveManager;
 
     public BatchAgent(String host, int port) {
         super(host, port);
+        this.threadPool = Executors.newCachedThreadPool(
+                new ThreadFactoryBuilder()
+                .setDaemon(true)
+                .setNameFormat("BatchAgent-%s")
+                .build()
+        );
         this.healthManager = new HealthManager(this);
         this.keepAliveManager = new KeepAliveManager(this);
+    }
+
+    public ExecutorService getThreadPool() {
+        return threadPool;
     }
 
     public HealthManager getHealthManager() {
@@ -111,7 +119,7 @@ public class BatchAgent extends NIOClient {
 
                             public void handle(final PacketJobExecute packet) {
                                 logger.info("Controller issued command to run job: " + packet);
-                                THREAD_POOL.execute(new Runnable() {
+                                threadPool.execute(new Runnable() {
                                     @Override
                                     public void run() {
                                         JobExecutor jobExecutor = new JobExecutor(BatchAgent.this, packet.getUuid(), packet.getCommand());
@@ -137,10 +145,10 @@ public class BatchAgent extends NIOClient {
     protected void startClient() throws InterruptedException {
         final Channel channel = getChannel();
 
-        healthManager.start(THREAD_POOL);
-        keepAliveManager.start(THREAD_POOL);
+        healthManager.start(threadPool);
+        keepAliveManager.start(threadPool);
 
-        THREAD_POOL.execute(new Runnable() {
+        threadPool.execute(new Runnable() {
             @Override
             public void run() {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
