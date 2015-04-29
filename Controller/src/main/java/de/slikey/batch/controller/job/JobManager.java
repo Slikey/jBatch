@@ -8,6 +8,7 @@ import de.slikey.batch.protocol.PacketJobResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -113,7 +114,7 @@ public class JobManager extends TickingManager{
                     logger.info("Job (ID: " + job.getUuid() + ") has no dependencies. Executing...");
                     executeJob(job);
                 } else {
-                    if (System.currentTimeMillis() > scheduleInformation.getStartTime()) {
+                    if (scheduleInformation.isResolved(System.currentTimeMillis(), new HashSet<UUID>())) {
                         logger.info("Job (ID: " + job.getUuid() + ") resolved dependencies. Executing...");
                         executeJob(job);
                     }

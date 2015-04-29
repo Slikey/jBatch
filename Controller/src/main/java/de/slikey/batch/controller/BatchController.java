@@ -86,7 +86,7 @@ public class BatchController extends NIOServer {
                                 }
                             }
                         });
-                        job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 1000L));
+                        job.setScheduleInformation(new JobScheduleInformation(System.currentTimeMillis() + (random.nextInt(10) + 10) * 1000L, null));
                         jobManager.schedule(job);
                         Thread.sleep(random.nextInt(45 * 1000));
                     }

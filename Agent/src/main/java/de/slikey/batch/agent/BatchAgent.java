@@ -81,6 +81,7 @@ public class BatchAgent extends NIOClient {
                     @Override
                     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
                         logger.info("Disconnected from Controller! (" + ctx.channel().remoteAddress() + ")");
+                        socketChannel.connect(ctx.channel().remoteAddress());
                         super.channelInactive(ctx);
                     }
 
@@ -120,6 +121,7 @@ public class BatchAgent extends NIOClient {
                             public void handle(final PacketJobExecute packet) {
                                 logger.info("Controller issued command to run job: " + packet);
                                 threadPool.execute(new Runnable() {
+
                                     @Override
                                     public void run() {
                                         JobExecutor jobExecutor = new JobExecutor(BatchAgent.this, packet.getUuid(), packet.getCommand());
@@ -127,6 +129,7 @@ public class BatchAgent extends NIOClient {
                                         logger.info("Worker replied to job (" + packet.getUuid() + ") with Return-Code " + jobExecutor.getExitCode());
                                         socketChannel.writeAndFlush(new PacketJobResponse(packet.getUuid(), jobExecutor.getExitCode()));
                                     }
+
                                 });
                             }
                         };
