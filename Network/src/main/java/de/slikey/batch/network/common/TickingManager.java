@@ -13,11 +13,13 @@ public abstract class TickingManager implements Runnable {
 
     private static Logger logger = LogManager.getLogger(TickingManager.class.getSimpleName());
 
+    private final TPSManager tpsManager;
     private Thread currentThread;
     private long interval;
     private long lastExecution;
 
-    public TickingManager(long interval) {
+    public TickingManager(TPSManager tpsManager, long interval) {
+        this.tpsManager = tpsManager;
         this.interval = interval;
     }
 
@@ -35,12 +37,26 @@ public abstract class TickingManager implements Runnable {
         }
     }
 
+    protected void onStart() {
+
+    }
+
+    protected void onStop() {
+
+    }
+
     @Override
     public final void run() {
         String name = this.getClass().getSimpleName();
         Logger childLogger =  LogManager.getLogger(name);
 
         currentThread = Thread.currentThread();
+        try {
+            onStart();
+        } catch (Exception e) {
+            childLogger.error("Error occurred in onStart() method. Manager not starting.", e);
+            return;
+        }
         try {
             while (!Thread.interrupted()) {
                 long currentTime = System.currentTimeMillis();
@@ -54,6 +70,7 @@ public abstract class TickingManager implements Runnable {
                 }
 
                 lastExecution = System.currentTimeMillis();
+                tpsManager.reportTime(this, lastExecution);
                 long timeTaken = lastExecution - currentTime;
 
                 long sleep = interval - timeTaken;
@@ -65,6 +82,11 @@ public abstract class TickingManager implements Runnable {
             }
         } catch (InterruptedException e) {
             // Interrupted running Thread
+        }
+        try {
+            onStop();
+        } catch (Exception e) {
+            childLogger.error("Error occurred in onStop() method. Forcing stop.", e);
         }
         currentThread = null;
 

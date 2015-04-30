@@ -1,6 +1,7 @@
 package de.slikey.batch.controller.monitoring;
 
 import de.slikey.batch.controller.BatchController;
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.protocol.PacketHealthStatus;
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +23,8 @@ public class HealthManager  extends TickingManager {
     private final String started;
     private long lastUptimeReport;
 
-    public HealthManager(BatchController batchController) {
-        super(1000);
+    public HealthManager(TPSManager tpsManager, BatchController batchController) {
+        super(tpsManager, 1000);
         this.batchController = batchController;
         this.healthMonitor = new HealthMonitor();
         this.started = new SimpleDateFormat("EEEE 'the' dd.MM.YY 'at' HH:mm:ss zzz").format(new Date());

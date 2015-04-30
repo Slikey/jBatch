@@ -1,7 +1,10 @@
 package de.slikey.batch.agent;
 
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.protocol.PacketHealthStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Kevin Carstens
@@ -9,10 +12,12 @@ import de.slikey.batch.protocol.PacketHealthStatus;
  */
 public class HealthManager extends TickingManager {
 
+    private static final Logger logger = LogManager.getLogger(HealthManager.class.getSimpleName());
+
     private final BatchAgent batchAgent;
 
-    public HealthManager(BatchAgent batchAgent) {
-        super(1000);
+    public HealthManager(TPSManager tpsManager, BatchAgent batchAgent) {
+        super(tpsManager, 1000);
         this.batchAgent = batchAgent;
     }
 
@@ -21,8 +26,17 @@ public class HealthManager extends TickingManager {
     }
 
     @Override
+    protected void onStart() {
+        logger.info("Started.");
+    }
+
+    @Override
     protected void onTick(double deltaSeconds) {
         batchAgent.sendPacket(PacketHealthStatus.create());
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 }

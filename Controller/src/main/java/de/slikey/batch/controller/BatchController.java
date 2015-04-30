@@ -7,6 +7,7 @@ import de.slikey.batch.controller.job.JobManager;
 import de.slikey.batch.controller.job.JobResponseCallback;
 import de.slikey.batch.controller.job.JobScheduleInformation;
 import de.slikey.batch.controller.monitoring.HealthManager;
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.server.NIOServer;
 import de.slikey.batch.protocol.PacketJobResponse;
@@ -30,6 +31,7 @@ public class BatchController extends NIOServer {
     }
 
     private final ExecutorService threadPool;
+    private final TPSManager tpsManager;
     private final AgentManager agentManager;
     private final JobManager jobManager;
     private final HealthManager healthManager;
@@ -42,13 +44,18 @@ public class BatchController extends NIOServer {
                         .setNameFormat("BatchController-%s")
                         .build()
         );
-        this.agentManager = new AgentManager(this);
-        this.jobManager = new JobManager(this);
-        this.healthManager = new HealthManager(this);
+        this.tpsManager = new TPSManager();
+        this.agentManager = new AgentManager(tpsManager, this);
+        this.jobManager = new JobManager(tpsManager, this);
+        this.healthManager = new HealthManager(tpsManager, this);
     }
 
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    public TPSManager getTpsManager() {
+        return tpsManager;
     }
 
     public AgentManager getAgentManager() {

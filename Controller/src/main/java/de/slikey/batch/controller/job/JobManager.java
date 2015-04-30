@@ -2,6 +2,7 @@ package de.slikey.batch.controller.job;
 
 import de.slikey.batch.controller.BatchController;
 import de.slikey.batch.controller.agent.Agent;
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.protocol.PacketJobResponse;
@@ -24,8 +25,8 @@ public class JobManager extends TickingManager{
     private final BatchController batchController;
     private final List<Job> jobs;
 
-    public JobManager(BatchController batchController) {
-        super(1000);
+    public JobManager(TPSManager tpsManager, BatchController batchController) {
+        super(tpsManager, 1000);
         this.batchController = batchController;
         this.jobs = new CopyOnWriteArrayList<>();
     }

@@ -1,5 +1,6 @@
 package de.slikey.batch.agent;
 
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.protocol.PacketKeepAlive;
 
@@ -11,8 +12,8 @@ public class KeepAliveManager extends TickingManager {
 
     private final BatchAgent batchAgent;
 
-    public KeepAliveManager(BatchAgent batchAgent) {
-        super(1000);
+    public KeepAliveManager(TPSManager tpsManager, BatchAgent batchAgent) {
+        super(tpsManager, 1000);
         this.batchAgent = batchAgent;
     }
 

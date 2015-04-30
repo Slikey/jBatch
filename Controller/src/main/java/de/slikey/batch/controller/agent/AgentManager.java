@@ -1,6 +1,7 @@
 package de.slikey.batch.controller.agent;
 
 import de.slikey.batch.controller.BatchController;
+import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.Packet;
 import io.netty.channel.Channel;
@@ -21,8 +22,8 @@ public class AgentManager extends TickingManager {
     private final Map<SocketAddress, Agent> agents;
     private final AgentHealthBalancer healthBalancer;
 
-    public AgentManager(BatchController batchController) {
-        super(1000);
+    public AgentManager(TPSManager tpsManager, BatchController batchController) {
+        super(tpsManager, 1000);
         this.batchController = batchController;
         this.agents = new HashMap<>();
         this.healthBalancer = new AgentHealthBalancer(this);

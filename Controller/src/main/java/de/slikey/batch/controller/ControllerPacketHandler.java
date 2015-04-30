@@ -1,5 +1,6 @@
 package de.slikey.batch.controller;
 
+import de.slikey.batch.network.protocol.HandlePacket;
 import de.slikey.batch.network.protocol.PacketHandler;
 import de.slikey.batch.protocol.*;
 import de.slikey.batch.protocol.job.PacketJobConsoleOutput;
@@ -23,31 +24,38 @@ public class ControllerPacketHandler extends PacketHandler {
         return connectionHandler;
     }
 
+    @HandlePacket
     public void handle(PacketHealthStatus packet) {
         connectionHandler.getAgent().handleHealthStatus(packet);
     }
 
+    @HandlePacket
     public void handle(PacketPing packet) {
         logger.debug(packet);
         connectionHandler.getAgent().sendPacket(PacketPong.create(packet));
     }
 
+    @HandlePacket
     public void handle(PacketPong packet) {
         logger.debug(packet);
     }
 
+    @HandlePacket
     public void handle(PacketException packet) {
         logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getInformation().getName() + ")", packet.getException());
     }
 
+    @HandlePacket
     public void handle(PacketAgentInformation packet) {
         connectionHandler.getAgent().handleAgentInformation(packet);
     }
 
+    @HandlePacket
     public void handle(PacketJobResponse packet) {
         connectionHandler.getInitializer().getBatchController().getJobManager().handleJobResponse(packet);
     }
 
+    @HandlePacket
     public void handle(PacketJobConsoleOutput packet) {
         System.out.println("[" + packet.getLevel() + "]: " + packet.getLine());
     }
