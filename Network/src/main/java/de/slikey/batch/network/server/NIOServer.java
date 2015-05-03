@@ -1,5 +1,6 @@
 package de.slikey.batch.network.server;
 
+import de.slikey.batch.network.NIOComponent;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.Protocol;
 import de.slikey.batch.network.server.listener.StartServerListener;
@@ -19,7 +20,7 @@ import java.io.IOException;
  * @author Kevin
  * @since 23.03.2015
  */
-public abstract class NIOServer {
+public abstract class NIOServer extends NIOComponent {
 
     private static final Logger logger = LogManager.getLogger(NIOServer.class.getSimpleName());
 
@@ -66,7 +67,7 @@ public abstract class NIOServer {
         return port;
     }
 
-    protected void close() {
+    protected void close() throws InterruptedException {
         System.out.println("Shutdown requested...");
         if (bossLoop != null) {
             bossLoop.shutdownGracefully().awaitUninterruptibly();
@@ -83,7 +84,7 @@ public abstract class NIOServer {
         }
     }
 
-    public void startApplication() {
+    public void startApplication() throws InterruptedException {
 
     }
 

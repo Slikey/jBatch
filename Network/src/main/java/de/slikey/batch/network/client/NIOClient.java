@@ -1,5 +1,6 @@
 package de.slikey.batch.network.client;
 
+import de.slikey.batch.network.NIOComponent;
 import de.slikey.batch.network.client.listener.StartClientListener;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
@@ -21,7 +22,7 @@ import java.io.IOException;
  * @author Kevin
  * @since 23.03.2015
  */
-public abstract class NIOClient {
+public abstract class NIOClient extends NIOComponent {
 
     private static final Logger logger = LogManager.getLogger(NIOClient.class.getSimpleName());
 

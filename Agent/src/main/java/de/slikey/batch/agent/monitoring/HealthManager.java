@@ -1,5 +1,6 @@
-package de.slikey.batch.agent;
+package de.slikey.batch.agent.monitoring;
 
+import de.slikey.batch.agent.BatchAgent;
 import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.protocol.PacketHealthStatus;
@@ -37,6 +38,5 @@ public class HealthManager extends TickingManager {
 
     @Override
     protected void onStop() {
-        super.onStop();
     }
 }
