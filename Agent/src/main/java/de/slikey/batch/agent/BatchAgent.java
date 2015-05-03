@@ -1,6 +1,6 @@
 package de.slikey.batch.agent;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import de.slikey.batch.agent.monitoring.HealthManager;
 import de.slikey.batch.network.client.NIOClient;
 import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kevin Carstens
@@ -29,12 +29,7 @@ public class BatchAgent extends NIOClient {
 
     public BatchAgent(String host, int port) {
         super(host, port);
-        this.threadPool = Executors.newCachedThreadPool(
-                new ThreadFactoryBuilder()
-                .setDaemon(true)
-                .setNameFormat("BatchAgent-%s")
-                .build()
-        );
+        this.threadPool = newCachedThreadPool();
         this.tpsManager = new TPSManager();
         this.healthManager = new HealthManager(tpsManager, this);
         this.keepAliveManager = new KeepAliveManager(tpsManager, this);
@@ -63,12 +58,24 @@ public class BatchAgent extends NIOClient {
 
     @Override
     protected void startClient() throws InterruptedException {
+        logger.info("Starting managers...");
         healthManager.start(threadPool);
         keepAliveManager.start(threadPool);
+        logger.info("Successfully started managers.");
 
+        waitForShutdown();
+    }
+
+    private void waitForShutdown() throws InterruptedException {
         synchronized (this) {
             wait();
         }
+        logger.info("Shutdown requested...");
+
+        threadPool.shutdownNow();
+        threadPool.awaitTermination(5, TimeUnit.SECONDS);
+
+        logger.info("Successfully shutdown.");
     }
 
 }

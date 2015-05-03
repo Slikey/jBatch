@@ -61,6 +61,7 @@ public class JobExecutor implements Runnable {
                 exitCode = process.waitFor();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                exitCode = -1;
             }
 
             console.stop();

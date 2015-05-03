@@ -1,6 +1,5 @@
 package de.slikey.batch.controller;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.slikey.batch.controller.agent.AgentManager;
 import de.slikey.batch.controller.job.Job;
 import de.slikey.batch.controller.job.JobManager;
@@ -16,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kevin Carstens
@@ -38,12 +37,7 @@ public class BatchController extends NIOServer {
 
     public BatchController(int port) {
         super(port);
-        this.threadPool = Executors.newCachedThreadPool(
-                new ThreadFactoryBuilder()
-                        .setDaemon(true)
-                        .setNameFormat("BatchController-%s")
-                        .build()
-        );
+        this.threadPool = newCachedThreadPool();
         this.tpsManager = new TPSManager();
         this.agentManager = new AgentManager(tpsManager, this);
         this.jobManager = new JobManager(tpsManager, this);
@@ -71,7 +65,7 @@ public class BatchController extends NIOServer {
     }
 
     @Override
-    public void startApplication() {
+    public void startApplication() throws InterruptedException {
         agentManager.start(threadPool);
         jobManager.start(threadPool);
         healthManager.start(threadPool);
@@ -102,6 +96,14 @@ public class BatchController extends NIOServer {
                 }
             }
         });
+    }
+
+    @Override
+    protected void close() throws InterruptedException {
+        super.close();
+
+        threadPool.shutdownNow();
+        threadPool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Override
