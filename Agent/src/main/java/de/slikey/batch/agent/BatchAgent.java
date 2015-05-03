@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import de.slikey.batch.network.client.NIOClient;
 import de.slikey.batch.network.common.TPSManager;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
-import io.netty.channel.Channel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,8 +63,6 @@ public class BatchAgent extends NIOClient {
 
     @Override
     protected void startClient() throws InterruptedException {
-        final Channel channel = getChannel();
-
         healthManager.start(threadPool);
         keepAliveManager.start(threadPool);
 
