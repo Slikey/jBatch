@@ -1,13 +1,16 @@
 package de.slikey.batch.network.protocol;
 
+import de.slikey.batch.network.client.NIOClient;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoop;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kevin
@@ -35,6 +38,27 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
             }
 
             ctx.close();
+        }
+    }
+
+    protected void tryReconnect(final NIOClient nioClient, final ChannelHandlerContext ctx) {
+        if (nioClient.isReconnect()) {
+            final EventLoop loop = ctx.channel().eventLoop();
+            loop.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    logger.info("Reconnecting to: " + nioClient.getHost() + ':' + nioClient.getPort());
+                    try {
+                        nioClient.connect();
+                    } catch (InterruptedException e) {
+                        logger.error(e);
+                    }
+                }
+            }, 10, TimeUnit.SECONDS);
+        } else {
+            synchronized (nioClient) {
+                nioClient.notify();
+            }
         }
     }
 

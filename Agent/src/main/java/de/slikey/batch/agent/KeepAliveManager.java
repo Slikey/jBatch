@@ -23,6 +23,7 @@ public class KeepAliveManager extends TickingManager {
 
     @Override
     protected void onTick(double deltaSeconds) {
+        if (!batchAgent.isRunning()) return;
         batchAgent.sendPacket(new PacketKeepAlive());
     }
 

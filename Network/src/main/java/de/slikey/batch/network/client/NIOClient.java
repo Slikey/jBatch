@@ -1,7 +1,6 @@
 package de.slikey.batch.network.client;
 
 import de.slikey.batch.network.NIOComponent;
-import de.slikey.batch.network.client.listener.StartClientListener;
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.Protocol;
@@ -30,11 +29,12 @@ public abstract class NIOClient extends NIOComponent {
     private final int port;
     private EventLoopGroup eventLoopGroup;
     private Channel channel;
-    private Bootstrap bootstrap;
+    private boolean reconnect;
 
     public NIOClient(String host, int port) {
         this.host = host;
         this.port = port;
+        this.reconnect = false;
     }
 
     public void run() {
@@ -43,13 +43,6 @@ public abstract class NIOClient extends NIOComponent {
         try {
             Protocol.initialize();
             ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
-            bootstrap = new Bootstrap()
-                    .group(eventLoopGroup)
-                    .channel(NioSocketChannel.class)
-                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                    .option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024)
-                    .option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024)
-                    .handler(buildPacketChannelInitializer());
 
             logger.info("Attempting to connect to " + host + ":" + port + "...");
 
@@ -62,11 +55,19 @@ public abstract class NIOClient extends NIOComponent {
         }
     }
 
-    private void connect() throws InterruptedException {
+    public void connect() throws InterruptedException {
+        channel = null;
+        Bootstrap bootstrap = new Bootstrap()
+                .group(eventLoopGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                .option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024)
+                .option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024)
+                .handler(buildPacketChannelInitializer());
         channel = bootstrap.connect(host, port)
-                .addListener(new StartClientListener(host, port))
                 .sync()
                 .channel();
+        System.out.println(channel);
     }
 
     protected void close() throws InterruptedException {
@@ -79,6 +80,22 @@ public abstract class NIOClient extends NIOComponent {
         } else {
             System.out.println("There is no EventLoopGroup!");
         }
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public boolean isReconnect() {
+        return reconnect;
+    }
+
+    public void setReconnect(boolean reconnect) {
+        this.reconnect = reconnect;
     }
 
     public void sendPacket(Packet packet) {

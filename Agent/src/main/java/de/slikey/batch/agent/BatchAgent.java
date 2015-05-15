@@ -33,6 +33,7 @@ public class BatchAgent extends NIOClient {
         this.tpsManager = new TPSManager();
         this.healthManager = new HealthManager(tpsManager, this);
         this.keepAliveManager = new KeepAliveManager(tpsManager, this);
+        this.setReconnect(true);
     }
 
     public ExecutorService getThreadPool() {

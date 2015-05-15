@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
  * @author Kevin
  * @since 03.05.2015
  */
-public class NIOComponent {
+public abstract class NIOComponent {
 
     protected ExecutorService newCachedThreadPool() {
         return Executors.newCachedThreadPool(

@@ -61,6 +61,7 @@ public class JobExecutor implements Runnable {
                 exitCode = process.waitFor();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                process.destroy();
                 exitCode = -1;
             }
 

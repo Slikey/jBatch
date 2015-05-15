@@ -33,6 +33,7 @@ public class HealthManager extends TickingManager {
 
     @Override
     protected void onTick(double deltaSeconds) {
+        if (!batchAgent.isRunning()) return;
         batchAgent.sendPacket(PacketHealthStatus.create());
     }
 
