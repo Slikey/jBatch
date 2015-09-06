@@ -1,7 +1,7 @@
 package de.slikey.batch.protocol;
 
+import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
-import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
@@ -20,6 +20,7 @@ public class PacketPong extends Packet {
     private byte[] bytes;
 
     public PacketPong() {
+        super();
     }
 
     public PacketPong(long sentTime, long receivedTime, byte[] bytes) {
@@ -40,7 +41,7 @@ public class PacketPong extends Packet {
         return receivedTime;
     }
 
-    public void setRecievedTime(long recievedTime) {
+    public void setRecievedTime(long receivedTime) {
         this.receivedTime = receivedTime;
     }
 
@@ -57,17 +58,17 @@ public class PacketPong extends Packet {
     }
 
     @Override
-    public void write(ByteBuf buf) throws IOException {
+    public void write(BufferWrapper buf) throws IOException {
         buf.writeLong(sentTime);
         buf.writeLong(receivedTime);
-        writeByteArray(buf, bytes);
+        buf.writeByteArray(bytes);
     }
 
     @Override
-    public void read(ByteBuf buf) throws IOException {
+    public void read(BufferWrapper buf) throws IOException {
         sentTime = buf.readLong();
         receivedTime = buf.readLong();
-        bytes = readByteArray(buf);
+        bytes = buf.readByteArray();
     }
 
     @Override

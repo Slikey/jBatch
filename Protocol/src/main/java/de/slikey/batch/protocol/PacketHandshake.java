@@ -1,7 +1,7 @@
 package de.slikey.batch.protocol;
 
+import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
-import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
@@ -14,10 +14,11 @@ public class PacketHandshake extends Packet {
     private int version;
 
     public PacketHandshake() {
-
+        super();
     }
 
     public PacketHandshake(int version) {
+        this();
         this.version = version;
     }
 
@@ -30,12 +31,12 @@ public class PacketHandshake extends Packet {
     }
 
     @Override
-    public void write(ByteBuf buf) throws IOException {
+    public void write(BufferWrapper buf) throws IOException {
         buf.writeInt(version);
     }
 
     @Override
-    public void read(ByteBuf buf) throws IOException {
+    public void read(BufferWrapper buf) throws IOException {
         version = buf.readInt();
     }
 

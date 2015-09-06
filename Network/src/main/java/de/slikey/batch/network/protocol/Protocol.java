@@ -24,10 +24,6 @@ public class Protocol {
     private static int protocolHash = 0;
     private static boolean initialized = false;
 
-    public static void initialize() throws IOException {
-        initialize("de.slikey.batch.network.protocol.packet");
-    }
-
     public static int getSize() {
         return packetIds.size();
     }
@@ -37,7 +33,7 @@ public class Protocol {
     }
 
     @SuppressWarnings("unchecked")
-    public static void initialize(String packagePath) throws IOException {
+    public static void initialize() throws IOException {
         logger.info("Initialize Protocol...");
         final ClassPath classPath = ClassPath.from(Thread.currentThread().getContextClassLoader());
 
@@ -57,7 +53,6 @@ public class Protocol {
             }
         }
         report = report.substring(0, report.length() - 2) + "\n}";
-
 
         logger.debug(report + " (Hash: " + protocolHash + ")");
         initialized = true;

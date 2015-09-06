@@ -2,8 +2,10 @@ package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.HandlePacket;
 import de.slikey.batch.network.protocol.PacketHandler;
-import de.slikey.batch.protocol.*;
-import de.slikey.batch.protocol.job.PacketJobConsoleOutput;
+import de.slikey.batch.protocol.PacketException;
+import de.slikey.batch.protocol.PacketHealthStatus;
+import de.slikey.batch.protocol.PacketPing;
+import de.slikey.batch.protocol.PacketPong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,22 +44,7 @@ public class ControllerPacketHandler extends PacketHandler {
 
     @HandlePacket
     public void handle(PacketException packet) {
-        logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getInformation().getName() + ")", packet.getException());
-    }
-
-    @HandlePacket
-    public void handle(PacketAgentInformation packet) {
-        connectionHandler.getAgent().handleAgentInformation(packet);
-    }
-
-    @HandlePacket
-    public void handle(PacketJobResponse packet) {
-        connectionHandler.getInitializer().getBatchController().getJobManager().handleJobResponse(packet);
-    }
-
-    @HandlePacket
-    public void handle(PacketJobConsoleOutput packet) {
-        System.out.println("[" + packet.getLevel() + "]: " + packet.getLine());
+        logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getChannel().remoteAddress().toString() + ")", packet.getException());
     }
 
 }

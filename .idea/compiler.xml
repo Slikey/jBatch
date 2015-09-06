@@ -29,5 +29,12 @@
         <module name="Protocol" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Agent" target="1.8" />
+      <module name="Controller" target="1.8" />
+      <module name="jBatch" target="1.8" />
+      <module name="Network" target="1.8" />
+      <module name="Protocol" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -39,8 +39,6 @@ public class AgentManager extends TickingManager {
 
     public void removeAgent(Channel channel) {
         Agent agent = agents.remove(channel.remoteAddress());
-        if (agent != null)
-            batchController.getJobManager().onAgentRemove(agent);
     }
 
     public BatchController getBatchController() {

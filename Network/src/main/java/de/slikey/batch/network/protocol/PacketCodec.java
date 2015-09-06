@@ -13,35 +13,39 @@ import java.util.List;
 public class PacketCodec extends ByteToMessageCodec<Packet> {
 
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, Packet packet, ByteBuf byteBuf) throws Exception {
-        ByteBuf alloc = channelHandlerContext.alloc().buffer();
-        Packet.writeVarInt(alloc, Protocol.getId(packet.getClass()));
-        packet.write(alloc);
+    protected void encode(ChannelHandlerContext channelHandlerContext, Packet packet, ByteBuf buf) throws Exception {
+        ByteBuf alloc = buf.alloc().buffer();
+        BufferWrapper wrapper = new BufferWrapper(alloc);
+        wrapper.writeVarInt(Protocol.getId(packet.getClass()));
+        packet.write(wrapper);
 
-        int length = alloc.readableBytes();
-        Packet.writeVarInt(byteBuf, length);
-        byteBuf.writeBytes(alloc);
+        int length = wrapper.getHandle().readableBytes();
+        BufferWrapper.writeVarInt(buf, length);
+        buf.writeBytes(alloc);
+
         alloc.release();
     }
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        if (!byteBuf.isReadable())
+    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf buf, List<Object> list) throws Exception {
+        if (!buf.isReadable()) {
             return;
+        }
 
-        if (byteBuf.readableBytes() >= 4) {
+        if (buf.readableBytes() >= 4) {
             // Length is received
-            byteBuf.markReaderIndex();
+            buf.markReaderIndex();
 
-            int length = Packet.readVarInt(byteBuf);
-            if (byteBuf.readableBytes() < length) {
+            BufferWrapper wrapper = new BufferWrapper(buf);
+            int length = wrapper.readVarInt();
+            if (buf.readableBytes() < length) {
                 // Not all data is received yet.
-                byteBuf.resetReaderIndex();
+                buf.resetReaderIndex();
             } else {
                 // All data is received
-                int packetId = Packet.readVarInt(byteBuf);
+                int packetId = wrapper.readVarInt();
                 Packet packet = Protocol.getPacket(packetId);
-                packet.read(byteBuf);
+                packet.read(wrapper);
                 list.add(packet);
             }
         }

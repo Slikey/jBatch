@@ -26,8 +26,8 @@ public abstract class PacketChannelInitializer extends ChannelInitializer<Socket
 
         pipeline.addLast(PACKET_CODEC, newPacketCodec(socketChannel));
 
-        ConnectionHandler connectionHandler =  newConnectionHandler(socketChannel);
-        pipeline.addLast(CONNECTION_HANDLER,connectionHandler);
+        ConnectionHandler connectionHandler = newConnectionHandler(socketChannel);
+        pipeline.addLast(CONNECTION_HANDLER, connectionHandler);
 
         pipeline.addLast(PACKET_HANDLER, connectionHandler.newPacketHandler());
     }

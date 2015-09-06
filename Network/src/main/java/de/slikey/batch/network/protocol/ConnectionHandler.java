@@ -44,15 +44,12 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
     protected void tryReconnect(final NIOClient nioClient, final ChannelHandlerContext ctx) {
         if (nioClient.isReconnect()) {
             final EventLoop loop = ctx.channel().eventLoop();
-            loop.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("Reconnecting to: " + nioClient.getHost() + ':' + nioClient.getPort());
-                    try {
-                        nioClient.connect();
-                    } catch (InterruptedException e) {
-                        logger.error(e);
-                    }
+            loop.schedule(() -> {
+                logger.info("Reconnecting to: " + nioClient.getHost() + ':' + nioClient.getPort());
+                try {
+                    nioClient.connect();
+                } catch (InterruptedException e) {
+                    logger.error(e);
                 }
             }, 10, TimeUnit.SECONDS);
         } else {

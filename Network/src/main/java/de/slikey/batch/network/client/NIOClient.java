@@ -42,7 +42,7 @@ public abstract class NIOClient extends NIOComponent {
 
         try {
             Protocol.initialize();
-            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
+            ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
 
             logger.info("Attempting to connect to " + host + ":" + port + "...");
 

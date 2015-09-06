@@ -34,20 +34,17 @@ public class PacketHandler extends ChannelHandlerAdapter {
             List<Class<? extends Packet>> packets = Protocol.getPackets();
             this.methods = new Method[packets.size()];
             Class<? extends PacketHandler> packetHandlerClass = packetHandler.getClass();
-            int index = 0;
-            for (Class<? extends Packet> packet : packets) {
+            for (int i = 0; i < packets.size(); i++) {
                 try {
-                    Method method = packetHandlerClass.getDeclaredMethod("handle", packet);
+                    Method method = packetHandlerClass.getDeclaredMethod("handle", packets.get(i));
                     if (method.isAnnotationPresent(HandlePacket.class)) {
                         method.setAccessible(true);
-                        this.methods[index] = method;
+                        this.methods[i] = method;
                     }
                 } catch (NoSuchMethodException e) {
                     // No Handler for Packet is defined.
                     // Ignoring Exception because this is a common way to have specific handlers
                 }
-
-                index++;
             }
         }
 

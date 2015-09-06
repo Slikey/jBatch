@@ -2,8 +2,8 @@ package de.slikey.batch.network;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author Kevin
@@ -11,8 +11,8 @@ import java.util.concurrent.Executors;
  */
 public abstract class NIOComponent {
 
-    protected ExecutorService newCachedThreadPool() {
-        return Executors.newCachedThreadPool(
+    protected ScheduledExecutorService newExecutorService(int threadCount) {
+        return Executors.newScheduledThreadPool(threadCount,
                 new ThreadFactoryBuilder()
                         .setDaemon(true)
                         .setNameFormat(this.getClass().getSimpleName() + "-%s")

@@ -7,7 +7,7 @@ import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,21 +22,21 @@ public class BatchAgent extends NIOClient {
         new BatchAgent("localhost", 8080).run();
     }
 
-    private final ExecutorService threadPool;
+    private final ScheduledExecutorService threadPool;
     private final TPSManager tpsManager;
     private final HealthManager healthManager;
     private final KeepAliveManager keepAliveManager;
 
     public BatchAgent(String host, int port) {
         super(host, port);
-        this.threadPool = newCachedThreadPool();
+        this.threadPool = newExecutorService(32);
         this.tpsManager = new TPSManager();
         this.healthManager = new HealthManager(tpsManager, this);
         this.keepAliveManager = new KeepAliveManager(tpsManager, this);
         this.setReconnect(true);
     }
 
-    public ExecutorService getThreadPool() {
+    public ScheduledExecutorService getThreadPool() {
         return threadPool;
     }
 
