@@ -1,5 +1,7 @@
 package de.slikey.batch.network.protocol;
 
+import io.netty.buffer.ByteBuf;
+
 import java.io.IOException;
 
 /**
@@ -8,8 +10,8 @@ import java.io.IOException;
  */
 public interface SerializableObject {
 
-    void read(BufferWrapper buf) throws IOException;
+    void read(ByteBuf buf) throws IOException;
 
-    void write(BufferWrapper buf) throws IOException;
+    void write(ByteBuf buf) throws IOException;
 
 }

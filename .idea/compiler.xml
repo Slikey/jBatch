@@ -29,7 +29,7 @@
         <module name="Protocol" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="1.8">
       <module name="Agent" target="1.8" />
       <module name="Controller" target="1.8" />
       <module name="jBatch" target="1.8" />

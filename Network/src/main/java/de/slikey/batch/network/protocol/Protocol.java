@@ -2,6 +2,7 @@ package de.slikey.batch.network.protocol;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.ClassPath;
+import gnu.trove.TObjectIntHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Kevin Carstens
@@ -19,17 +21,20 @@ import java.util.Arrays;
 public class Protocol {
 
     private static final Logger logger = LogManager.getLogger(Protocol.class.getSimpleName());
-    private static final Constructor[] packets = new Constructor[Byte.MAX_VALUE];
-    private static final ArrayList<Class<? extends Packet>> packetIds = new ArrayList<>();
+    private static final int PROTOCOL_SIZE = Byte.MAX_VALUE;
+    private static final List<Class<? extends Packet>> PACKETS = new ArrayList<>(PROTOCOL_SIZE);
+    private static final Constructor[] CONSTRUCTORS = new Constructor[PROTOCOL_SIZE];
+    private static final TObjectIntHashMap CLASS_ID_MAP = new TObjectIntHashMap(PROTOCOL_SIZE);
+    private static int size = 0;
     private static int protocolHash = 0;
     private static boolean initialized = false;
 
     public static int getSize() {
-        return packetIds.size();
+        return size;
     }
 
     public static ImmutableList<Class<? extends Packet>> getPackets() {
-        return ImmutableList.copyOf(packetIds);
+        return ImmutableList.copyOf(PACKETS);
     }
 
     @SuppressWarnings("unchecked")
@@ -63,9 +68,10 @@ public class Protocol {
         try {
             Constructor<?> constructor = clazz.getConstructor();
             constructor.setAccessible(true);
-            packetIds.add(clazz);
-            int index = packetIds.indexOf(clazz);
-            packets[index] = constructor;
+            int index = size++;
+            PACKETS.add(clazz);
+            CONSTRUCTORS[index] = constructor;
+            CLASS_ID_MAP.put(clazz, index);
 
             protocolHash = 31 * protocolHash + index;
             Field[] declaredFields = clazz.getDeclaredFields();
@@ -93,7 +99,7 @@ public class Protocol {
     }
 
     public static int getId(Class<? extends Packet> clazz) {
-        return packetIds.indexOf(clazz);
+        return CLASS_ID_MAP.get(clazz);
     }
 
     public static Packet getPacket(int id) throws BadPacketException {
@@ -102,7 +108,7 @@ public class Protocol {
         }
 
         try {
-            Constructor<?> constructor = packets[id];
+            Constructor<?> constructor = CONSTRUCTORS[id];
             if (constructor != null) {
                 Packet packet = (Packet) constructor.newInstance();
                 packet.setId(id);

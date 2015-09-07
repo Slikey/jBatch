@@ -1,7 +1,7 @@
 package de.slikey.batch.protocol;
 
-import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -57,15 +57,15 @@ public class PacketPing extends Packet {
     }
 
     @Override
-    public void write(BufferWrapper buf) throws IOException {
+    public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
-        buf.writeByteArray(bytes);
+        writeByteArray(buf, bytes);
     }
 
     @Override
-    public void read(BufferWrapper buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         sentTime = buf.readLong();
-        bytes = buf.readByteArray();
+        bytes = readByteArray(buf);
         receivedTime = System.nanoTime();
     }
 

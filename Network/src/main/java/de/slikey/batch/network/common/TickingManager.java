@@ -93,7 +93,9 @@ public abstract class TickingManager implements Runnable {
                     executorService.schedule(this, sleep, TimeUnit.MILLISECONDS);
                 } else {
                     executorService.submit(this);
-                    childLogger.warn("Tick took " + timeTaken + "ms! Goal was " + interval + "! (" + this.getClass().getName() + ")");
+                    if (interval > 0) {
+                        childLogger.warn("Tick took " + timeTaken + "ms! Goal was " + interval + "! (" + this.getClass().getName() + ")");
+                    }
                 }
             }
         }

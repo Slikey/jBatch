@@ -2,8 +2,8 @@ package de.slikey.batch.protocol;
 
 import com.sun.management.OperatingSystemMXBean;
 import com.sun.management.ThreadMXBean;
-import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 import java.lang.management.*;
@@ -306,7 +306,7 @@ public class PacketHealthStatus extends Packet {
     }
 
     @Override
-    public void write(BufferWrapper buf) throws IOException {
+    public void write(ByteBuf buf) throws IOException {
         // Information of System
         buf.writeLong(committedVirtualMemorySize);
         buf.writeLong(freePhysicalMemorySize);
@@ -318,8 +318,8 @@ public class PacketHealthStatus extends Packet {
         buf.writeLong(totalSwapSpaceSize);
 
         // Information on Runtime
-        buf.writeString(name);
-        buf.writeString(vmVersion);
+        writeString(buf, name);
+        writeString(buf, vmVersion);
         buf.writeLong(uptime);
         buf.writeLong(startTime);
 
@@ -343,7 +343,7 @@ public class PacketHealthStatus extends Packet {
     }
 
     @Override
-    public void read(BufferWrapper buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         committedVirtualMemorySize = buf.readLong();
         freePhysicalMemorySize = buf.readLong();
         freeSwapSpaceSize = buf.readLong();
@@ -353,8 +353,8 @@ public class PacketHealthStatus extends Packet {
         totalPhysicalMemorySize = buf.readLong();
         totalSwapSpaceSize = buf.readLong();
 
-        name = buf.readString();
-        vmVersion = buf.readString();
+        name = readString(buf);
+        vmVersion = readString(buf);
         uptime = buf.readLong();
         startTime = buf.readLong();
 
@@ -374,14 +374,14 @@ public class PacketHealthStatus extends Packet {
         unloadedClassCount = buf.readLong();
     }
 
-    private void writeMemoryUsage(BufferWrapper buf, MemoryUsage memoryUsage) throws IOException {
+    private void writeMemoryUsage(ByteBuf buf, MemoryUsage memoryUsage) throws IOException {
         buf.writeLong(memoryUsage.getInit());
         buf.writeLong(memoryUsage.getUsed());
         buf.writeLong(memoryUsage.getCommitted());
         buf.writeLong(memoryUsage.getMax());
     }
 
-    private MemoryUsage readMemoryUsage(BufferWrapper buf) throws IOException {
+    private MemoryUsage readMemoryUsage(ByteBuf buf) throws IOException {
         long init = buf.readLong();
         long used = buf.readLong();
         long committed = buf.readLong();

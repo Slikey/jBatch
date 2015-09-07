@@ -3,7 +3,9 @@ package de.slikey.batch.agent;
 import de.slikey.batch.agent.monitoring.HealthManager;
 import de.slikey.batch.network.client.NIOClient;
 import de.slikey.batch.network.common.TPSManager;
+import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.network.protocol.PacketChannelInitializer;
+import de.slikey.batch.protocol.PacketKeepAlive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +64,16 @@ public class BatchAgent extends NIOClient {
         logger.info("Starting managers...");
         healthManager.start(threadPool);
         keepAliveManager.start(threadPool);
+        new TickingManager(tpsManager, 1) {
+
+            @Override
+            protected void onTick(double deltaSeconds) {
+                for (int i = 0; i < 10; i++) {
+                    sendPacket(new PacketKeepAlive());
+                }
+            }
+
+        }.start(threadPool);
         logger.info("Successfully started managers.");
 
         waitForShutdown();

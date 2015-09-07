@@ -15,12 +15,11 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Packet packet, ByteBuf buf) throws Exception {
         ByteBuf alloc = buf.alloc().buffer();
-        BufferWrapper wrapper = new BufferWrapper(alloc);
-        wrapper.writeVarInt(Protocol.getId(packet.getClass()));
-        packet.write(wrapper);
+        Packet.writeVarInt(alloc, Protocol.getId(packet.getClass()));
+        packet.write(alloc);
 
-        int length = wrapper.getHandle().readableBytes();
-        BufferWrapper.writeVarInt(buf, length);
+        int length = alloc.readableBytes();
+        Packet.writeVarInt(buf, length);
         buf.writeBytes(alloc);
 
         alloc.release();
@@ -36,16 +35,15 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
             // Length is received
             buf.markReaderIndex();
 
-            BufferWrapper wrapper = new BufferWrapper(buf);
-            int length = wrapper.readVarInt();
+            int length = Packet.readVarInt(buf);
             if (buf.readableBytes() < length) {
                 // Not all data is received yet.
                 buf.resetReaderIndex();
             } else {
                 // All data is received
-                int packetId = wrapper.readVarInt();
+                int packetId = Packet.readVarInt(buf);
                 Packet packet = Protocol.getPacket(packetId);
-                packet.read(wrapper);
+                packet.read(buf);
                 list.add(packet);
             }
         }

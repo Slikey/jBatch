@@ -1,7 +1,7 @@
 package de.slikey.batch.protocol;
 
-import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
@@ -40,15 +40,15 @@ public class PacketException extends Packet {
     }
 
     @Override
-    public void write(BufferWrapper buf) throws IOException {
-        buf.writeString(name);
-        buf.writeException(exception);
+    public void write(ByteBuf buf) throws IOException {
+        writeString(buf, name);
+        writeException(buf, exception);
     }
 
     @Override
-    public void read(BufferWrapper buf) throws IOException {
-        name = buf.readString();
-        exception = buf.readException();
+    public void read(ByteBuf buf) throws IOException {
+        name = readString(buf);
+        exception = readException(buf);
     }
 
     @Override

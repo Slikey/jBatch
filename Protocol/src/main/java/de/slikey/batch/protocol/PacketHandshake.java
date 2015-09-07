@@ -1,7 +1,8 @@
 package de.slikey.batch.protocol;
 
-import de.slikey.batch.network.protocol.BufferWrapper;
 import de.slikey.batch.network.protocol.Packet;
+import de.slikey.batch.network.protocol.SerializableObject;
+import io.netty.buffer.ByteBuf;
 
 import java.io.IOException;
 
@@ -9,7 +10,7 @@ import java.io.IOException;
  * @author Kevin Carstens
  * @since 27.04.2015
  */
-public class PacketHandshake extends Packet {
+public class PacketHandshake extends Packet implements SerializableObject {
 
     private int version;
 
@@ -31,12 +32,12 @@ public class PacketHandshake extends Packet {
     }
 
     @Override
-    public void write(BufferWrapper buf) throws IOException {
+    public void write(ByteBuf buf) throws IOException {
         buf.writeInt(version);
     }
 
     @Override
-    public void read(BufferWrapper buf) throws IOException {
+    public void read(ByteBuf buf) throws IOException {
         version = buf.readInt();
     }
 
