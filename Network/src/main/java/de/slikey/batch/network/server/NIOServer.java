@@ -27,7 +27,8 @@ public abstract class NIOServer extends NIOComponent {
     private final int port;
     private EventLoopGroup bossLoop, workerLoop;
 
-    public NIOServer(int port) {
+    public NIOServer(int port, int threadCount) {
+        super(threadCount);
         this.port = port;
     }
 
@@ -84,9 +85,7 @@ public abstract class NIOServer extends NIOComponent {
         }
     }
 
-    public void startApplication() throws InterruptedException {
-
-    }
+    public abstract void startApplication() throws InterruptedException;
 
     protected abstract PacketChannelInitializer buildPacketChannelInitializer();
 

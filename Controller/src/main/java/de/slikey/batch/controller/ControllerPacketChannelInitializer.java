@@ -10,14 +10,14 @@ import io.netty.channel.socket.SocketChannel;
  */
 public class ControllerPacketChannelInitializer extends PacketChannelInitializer {
 
-    private final BatchController batchController;
+    private final MainController mainController;
 
-    public ControllerPacketChannelInitializer(BatchController batchController) {
-        this.batchController = batchController;
+    public ControllerPacketChannelInitializer(MainController mainController) {
+        this.mainController = mainController;
     }
 
-    public BatchController getBatchController() {
-        return batchController;
+    public MainController getMainController() {
+        return mainController;
     }
 
     @Override

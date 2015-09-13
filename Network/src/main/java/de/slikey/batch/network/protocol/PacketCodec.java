@@ -15,6 +15,7 @@ public class PacketCodec extends ByteToMessageCodec<Packet> {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Packet packet, ByteBuf buf) throws Exception {
         ByteBuf alloc = buf.alloc().buffer();
+
         Packet.writeVarInt(alloc, Protocol.getId(packet.getClass()));
         packet.write(alloc);
 

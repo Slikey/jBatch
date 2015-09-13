@@ -1,16 +1,15 @@
 package de.slikey.batch.network.protocol;
 
-import de.slikey.batch.network.client.NIOClient;
+import de.slikey.batch.network.protocol.packet.PacketHandshake;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.EventLoop;
+import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.ReadTimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kevin
@@ -19,6 +18,12 @@ import java.util.concurrent.TimeUnit;
 public abstract class ConnectionHandler extends ChannelHandlerAdapter {
 
     private static final Logger logger = LogManager.getLogger(ConnectionHandler.class.getSimpleName());
+
+    private boolean initialized;
+
+    public ConnectionHandler() {
+        initialized = false;
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -32,6 +37,8 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
                 logger.info("xx " + address + " sent a bad packet: " + cause.getMessage());
                 if (cause.getCause() instanceof IndexOutOfBoundsException)
                     cause.printStackTrace();
+            } else if (cause instanceof Error) {
+                logger.info("xx " + address + " Error: " + cause);
             } else {
                 logger.info("xx " + address + " encountered exception: ");
                 cause.printStackTrace();
@@ -41,23 +48,31 @@ public abstract class ConnectionHandler extends ChannelHandlerAdapter {
         }
     }
 
-    protected void tryReconnect(final NIOClient nioClient, final ChannelHandlerContext ctx) {
-        if (nioClient.isReconnect()) {
-            final EventLoop loop = ctx.channel().eventLoop();
-            loop.schedule(() -> {
-                logger.info("Reconnecting to: " + nioClient.getHost() + ':' + nioClient.getPort());
-                try {
-                    nioClient.connect();
-                } catch (InterruptedException e) {
-                    logger.error(e);
-                }
-            }, 10, TimeUnit.SECONDS);
-        } else {
-            synchronized (nioClient) {
-                nioClient.notify();
-            }
-        }
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        ctx.channel().write(new PacketHandshake(Protocol.getProtocolHash(), PacketHandshake.ServerType.DEFAULT));
+        logger.info("Sent handshake to " + ctx.channel().remoteAddress() + "!");
+        super.channelActive(ctx);
     }
 
-    public abstract PacketHandler newPacketHandler();
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (!initialized) {
+            if (msg instanceof PacketHandshake) {
+                final PacketHandshake packetHandshake = (PacketHandshake) msg;
+                if (packetHandshake.getVersion() == Protocol.getProtocolHash()) {
+                    final ChannelPipeline pipeline = ctx.channel().pipeline();
+                    pipeline.addLast(PacketChannelInitializer.PACKET_HANDLER, newPacketHandler(packetHandshake.getServerType()));
+                    initialized = true;
+                } else {
+                    throw new Error("Protocol-Version mismatch! " + Protocol.getProtocolHash() + " (We) != " + packetHandshake.getVersion() + " (Other)");
+                }
+            } else {
+                throw new Error("Server doesn't accept Packets yet. Received " + msg.getClass().getName() + "!");
+            }
+        }
+        super.channelRead(ctx, msg);
+    }
+
+    public abstract PacketHandler newPacketHandler(PacketHandshake.ServerType serverType);
 }

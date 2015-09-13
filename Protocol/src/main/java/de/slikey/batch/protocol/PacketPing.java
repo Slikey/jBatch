@@ -60,6 +60,7 @@ public class PacketPing extends Packet {
     public void write(ByteBuf buf) throws IOException {
         buf.writeLong(sentTime);
         writeByteArray(buf, bytes);
+        buf.writeLong(receivedTime);
     }
 
     @Override

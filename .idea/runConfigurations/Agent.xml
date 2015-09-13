@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Agent" type="Application" factoryName="Application">
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-    <option name="MAIN_CLASS_NAME" value="de.slikey.batch.agent.BatchAgent" />
-    <option name="VM_PARAMETERS" value="" />
+    <option name="MAIN_CLASS_NAME" value="de.slikey.batch.agent.MainClient" />
+    <option name="VM_PARAMETERS" value="-XX:MaxDirectMemorySize=6G -XX:+UseG1GC -XX:MaxGCPauseMillis=1000 -XX:+UseStringDeduplication -XX:G1HeapRegionSize=8M -Dio.netty.selectorAutoRebuildThreshold=0 -Dio.netty.leakDetectionLevel=disable" />
     <option name="PROGRAM_PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />

@@ -1,7 +1,6 @@
 package de.slikey.batch.agent.monitoring;
 
-import de.slikey.batch.agent.BatchAgent;
-import de.slikey.batch.network.common.TPSManager;
+import de.slikey.batch.agent.MainClient;
 import de.slikey.batch.network.common.TickingManager;
 import de.slikey.batch.protocol.PacketHealthStatus;
 import org.apache.logging.log4j.LogManager;
@@ -15,26 +14,21 @@ public class HealthManager extends TickingManager {
 
     private static final Logger logger = LogManager.getLogger(HealthManager.class.getSimpleName());
 
-    private final BatchAgent batchAgent;
+    private final MainClient mainClient;
 
-    public HealthManager(TPSManager tpsManager, BatchAgent batchAgent) {
-        super(tpsManager, 1000);
-        this.batchAgent = batchAgent;
+    public HealthManager(MainClient mainClient) {
+        super(mainClient, 1000);
+        this.mainClient = mainClient;
     }
 
-    public BatchAgent getBatchAgent() {
-        return batchAgent;
-    }
-
-    @Override
-    protected void onStart() {
-        logger.info("Started.");
+    public MainClient getMainClient() {
+        return mainClient;
     }
 
     @Override
     protected void onTick(double deltaSeconds) {
-        if (!batchAgent.isRunning()) return;
-        batchAgent.sendPacket(PacketHealthStatus.create());
+        if (!mainClient.isRunning()) return;
+        mainClient.sendPacket(PacketHealthStatus.create());
     }
 
     @Override

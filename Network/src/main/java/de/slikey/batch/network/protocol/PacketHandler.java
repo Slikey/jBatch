@@ -3,9 +3,11 @@ package de.slikey.batch.network.protocol;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,39 +23,41 @@ public class PacketHandler extends ChannelHandlerAdapter {
     }
 
     @Override
-    public final void channelRead(ChannelHandlerContext channelHandlerContext, Object object) throws Exception {
+    public final void channelRead(ChannelHandlerContext ctx, Object object) throws Exception {
         Packet packet = (Packet) object;
-        methodCache.invoke(packet);
+        methodCache.invoke(ctx, packet);
     }
 
     private class MethodCache {
 
-        private final Method[] methods;
+        private final Method[][] methods;
 
         private MethodCache(PacketHandler packetHandler) {
             List<Class<? extends Packet>> packets = Protocol.getPackets();
-            this.methods = new Method[packets.size()];
+            this.methods = new Method[packets.size()][];
             Class<? extends PacketHandler> packetHandlerClass = packetHandler.getClass();
             for (int i = 0; i < packets.size(); i++) {
-                try {
-                    Method method = packetHandlerClass.getDeclaredMethod("handle", packets.get(i));
-                    if (method.isAnnotationPresent(HandlePacket.class)) {
-                        method.setAccessible(true);
-                        this.methods[i] = method;
+                Class<? extends Packet> packet = packets.get(i);
+                List<Method> methods = new ArrayList<>();
+                for (Method method : packetHandlerClass.getDeclaredMethods()) {
+                    if (method.isAnnotationPresent(HandlePacket.class)
+                            && method.getParameterCount() == 1
+                            && ArrayUtils.contains(method.getParameterTypes(), packet)) {
+                        methods.add(method);
                     }
-                } catch (NoSuchMethodException e) {
-                    // No Handler for Packet is defined.
-                    // Ignoring Exception because this is a common way to have specific handlers
                 }
+                this.methods[i] = methods.toArray(new Method[methods.size()]);
             }
         }
 
-        public void invoke(Packet packet) throws InvocationTargetException, IllegalAccessException {
-            Method method = methods[packet.getId()];
-            if (method == null)
-                return;
-
-            method.invoke(PacketHandler.this, packet);
+        public void invoke(ChannelHandlerContext ctx, Packet packet) throws InvocationTargetException, IllegalAccessException {
+            for (Method method : methods[packet.getId()]) {
+                try {
+                    method.invoke(PacketHandler.this, packet);
+                } catch (Throwable cause) {
+                    ctx.fireExceptionCaught(cause);
+                }
+            }
         }
 
     }

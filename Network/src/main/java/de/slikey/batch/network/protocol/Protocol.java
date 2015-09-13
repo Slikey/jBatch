@@ -8,10 +8,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -74,15 +72,7 @@ public class Protocol {
             CLASS_ID_MAP.put(clazz, index);
 
             protocolHash = 31 * protocolHash + index;
-            Field[] declaredFields = clazz.getDeclaredFields();
-            String[] variableDeclarations = new String[declaredFields.length];
-            for (int i = 0; i < declaredFields.length; i++) {
-                variableDeclarations[i] = declaredFields[i].toString();
-            }
-            Arrays.sort(variableDeclarations);
-            for (String string : variableDeclarations) {
-                protocolHash = 31 * protocolHash + string.hashCode();
-            }
+            protocolHash = 31 * protocolHash + clazz.getSimpleName().hashCode();
 
             return index;
         } catch (NoSuchMethodException e) {

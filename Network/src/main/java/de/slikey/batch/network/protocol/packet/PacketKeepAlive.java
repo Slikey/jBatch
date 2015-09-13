@@ -1,4 +1,4 @@
-package de.slikey.batch.protocol;
+package de.slikey.batch.network.protocol.packet;
 
 import de.slikey.batch.network.protocol.Packet;
 import io.netty.buffer.ByteBuf;
@@ -10,6 +10,9 @@ import java.io.IOException;
  * @since 16.04.2015
  */
 public class PacketKeepAlive extends Packet {
+
+    public static final PacketKeepAlive instance = new PacketKeepAlive();
+    public static int TIMEOUT_SECONDS = 15;
 
     public PacketKeepAlive() {
         super();

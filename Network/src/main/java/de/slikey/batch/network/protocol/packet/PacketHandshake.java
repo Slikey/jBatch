@@ -1,4 +1,4 @@
-package de.slikey.batch.protocol;
+package de.slikey.batch.network.protocol.packet;
 
 import de.slikey.batch.network.protocol.Packet;
 import de.slikey.batch.network.protocol.SerializableObject;
@@ -13,14 +13,16 @@ import java.io.IOException;
 public class PacketHandshake extends Packet implements SerializableObject {
 
     private int version;
+    private ServerType serverType;
 
     public PacketHandshake() {
         super();
     }
 
-    public PacketHandshake(int version) {
+    public PacketHandshake(int version, ServerType serverType) {
         this();
         this.version = version;
+        this.serverType = serverType;
     }
 
     public int getVersion() {
@@ -31,14 +33,38 @@ public class PacketHandshake extends Packet implements SerializableObject {
         this.version = version;
     }
 
+    public ServerType getServerType() {
+        return serverType;
+    }
+
+    public void setServerType(ServerType serverType) {
+        this.serverType = serverType;
+    }
+
     @Override
     public void write(ByteBuf buf) throws IOException {
         buf.writeInt(version);
+        writeServerType(buf, serverType);
     }
 
     @Override
     public void read(ByteBuf buf) throws IOException {
         version = buf.readInt();
+        serverType = readServerType(buf);
+    }
+
+    private static void writeServerType(ByteBuf buf, ServerType code) {
+        buf.writeByte(code.ordinal());
+    }
+
+    private static ServerType readServerType(ByteBuf buf) {
+        return ServerType.values()[buf.readByte()];
+    }
+
+    public enum ServerType {
+
+        DEFAULT
+
     }
 
     @Override

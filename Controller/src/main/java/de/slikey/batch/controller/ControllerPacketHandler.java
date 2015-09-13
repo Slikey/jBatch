@@ -2,10 +2,7 @@ package de.slikey.batch.controller;
 
 import de.slikey.batch.network.protocol.HandlePacket;
 import de.slikey.batch.network.protocol.PacketHandler;
-import de.slikey.batch.protocol.PacketException;
-import de.slikey.batch.protocol.PacketHealthStatus;
-import de.slikey.batch.protocol.PacketPing;
-import de.slikey.batch.protocol.PacketPong;
+import de.slikey.batch.protocol.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,13 +25,13 @@ public class ControllerPacketHandler extends PacketHandler {
 
     @HandlePacket
     public void handle(PacketHealthStatus packet) {
-        connectionHandler.getAgent().handleHealthStatus(packet);
+        connectionHandler.getClient().handleHealthStatus(packet);
     }
 
     @HandlePacket
     public void handle(PacketPing packet) {
         logger.debug(packet);
-        connectionHandler.getAgent().sendPacket(PacketPong.create(packet));
+        connectionHandler.getClient().sendPacket(PacketPong.create(packet));
     }
 
     @HandlePacket
@@ -43,8 +40,8 @@ public class ControllerPacketHandler extends PacketHandler {
     }
 
     @HandlePacket
-    public void handle(PacketException packet) {
-        logger.error("Exception thrown in connected Agent. (" + connectionHandler.getAgent().getChannel().remoteAddress().toString() + ")", packet.getException());
+    public void handle(PacketConsoleOutput packet) {
+        logger.info(packet.getUuid() + ": " + packet.getLine());
     }
 
 }

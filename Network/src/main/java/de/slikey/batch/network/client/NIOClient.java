@@ -6,9 +6,7 @@ import de.slikey.batch.network.protocol.PacketChannelInitializer;
 import de.slikey.batch.network.protocol.Protocol;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.ResourceLeakDetector;
@@ -16,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Kevin
@@ -27,11 +26,13 @@ public abstract class NIOClient extends NIOComponent {
 
     private final String host;
     private final int port;
+    private Bootstrap bootstrap;
     private EventLoopGroup eventLoopGroup;
     private Channel channel;
     private boolean reconnect;
 
-    public NIOClient(String host, int port) {
+    public NIOClient(String host, int port, int threadCount) {
+        super(threadCount);
         this.host = host;
         this.port = port;
         this.reconnect = false;
@@ -47,39 +48,59 @@ public abstract class NIOClient extends NIOComponent {
             logger.info("Attempting to connect to " + host + ":" + port + "...");
 
             connect();
-            startClient();
-        } catch (InterruptedException | IOException e) {
+            started();
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
             eventLoopGroup.shutdownGracefully();
         }
     }
 
-    public void connect() throws InterruptedException {
+    public void connect() {
         channel = null;
-        Bootstrap bootstrap = new Bootstrap()
-                .group(eventLoopGroup)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024)
-                .option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024)
-                .handler(buildPacketChannelInitializer());
-        channel = bootstrap.connect(host, port)
-                .sync()
-                .channel();
-        System.out.println(channel);
+        if (bootstrap == null) {
+            bootstrap = new Bootstrap()
+                    .group(eventLoopGroup)
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+                    .option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024)
+                    .option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                    .handler(buildPacketChannelInitializer());
+        }
+
+        bootstrap.connect(host, port)
+                .addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        try {
+                            Throwable cause = future.cause();
+                            if (cause != null) {
+                                throw cause;
+                            }
+                            channel = future.channel();
+                            logger.info("Connected to " + host + ":" + port);
+                        } catch (Throwable throwable) {
+                            logger.error("Failed to connect: " + throwable);
+                            connect();
+                        }
+                    }
+                });
     }
 
     protected void close() throws InterruptedException {
-        if (channel != null)
+        logger.info("Shutdown requested...");
+        if (channel != null) {
             channel.close().awaitUninterruptibly();
-        System.out.println("Shutdown requested...");
+        }
         if (eventLoopGroup != null) {
             eventLoopGroup.shutdownGracefully().awaitUninterruptibly();
-            System.out.println("Successfully shutdown!");
-        } else {
-            System.out.println("There is no EventLoopGroup!");
         }
+
+        getExecutorService().shutdown();
+        getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+
+        logger.info("Successfully shutdown.");
     }
 
     public String getHost() {
@@ -112,6 +133,10 @@ public abstract class NIOClient extends NIOComponent {
 
     protected abstract PacketChannelInitializer buildPacketChannelInitializer();
 
-    protected abstract void startClient() throws InterruptedException;
+    protected abstract void started();
+
+    protected abstract void connected();
+
+    protected abstract void disconnected();
 
 }
